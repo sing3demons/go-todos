@@ -38,8 +38,7 @@ func main() {
 
 	app := fiber.New()
 	app.Use(recover.New())
-	// Readiness Probe
-	app.Get("/healthz", func(c *fiber.Ctx) error { return c.SendStatus(fiber.StatusOK) })
+
 	app.Get("/dashboard", monitor.New())
 
 	if os.Getenv("APP_ENV") == "production" {
@@ -58,7 +57,7 @@ func main() {
 			TimeInterval: 500 * time.Millisecond,
 		}))
 	}
-	
+
 	app.Use(logger.New(logger.ConfigDefault))
 	app.Get("/x", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -66,6 +65,8 @@ func main() {
 			"buildtime":   buildtime,
 		})
 	})
+	// Readiness Probe
+	app.Get("/healthz", func(c *fiber.Ctx) error { return c.SendStatus(fiber.StatusOK) })
 
 	//Graceful Shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
