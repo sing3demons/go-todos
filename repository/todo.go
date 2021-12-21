@@ -1,11 +1,26 @@
 package repository
 
-type TodoRepository interface{}
+import (
+	"github.com/sing3demons/go-todos/model"
+	"gorm.io/gorm"
+)
 
-type todoRepository struct{}
-
-func NewTodoRepository() TodoRepository {
-	return &todoRepository{}
+type TodoRepository interface{
+	AllTodos() ([]model.Todo, error)
 }
 
-func (repo *todoRepository) AllTodos() {}
+type todoRepository struct{ DB *gorm.DB }
+
+func NewTodoRepository(db *gorm.DB) TodoRepository {
+	return &todoRepository{DB: db}
+}
+
+func (repo *todoRepository) AllTodos() ([]model.Todo, error) {
+	var todos []model.Todo
+
+	if err := repo.DB.Find(&todos).Error; err != nil {
+		return nil, err
+	}
+
+	return todos, nil
+}

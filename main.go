@@ -15,6 +15,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 
+	"github.com/sing3demons/go-todos/database"
 	"github.com/sing3demons/go-todos/routes"
 )
 
@@ -38,6 +39,7 @@ func main() {
 		}
 	}
 	// connect database
+	database.InitDB()
 
 	app := fiber.New()
 	app.Use(recover.New())
