@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  gotodos:
+    image: gotodos
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - ${PORT}:${PORT} 
