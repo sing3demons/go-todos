@@ -18,5 +18,6 @@ echo $?
 
 ```
 docker build -t gotodos:0.0.1 .
-docker run --rm -p 8080:8080 -e PORT=8080 --name gotodos gotodos:0.0.1
+docker run --rm -p 8080:8080 -e PORT=8080 -e APP_ENV=dev --name gotodos gotodos:0.0.1
+docker run --rm -p 8080:8080 -e PORT=8080 -e APP_ENV=production -v $(pwd)/logs:/logs --name gotodos gotodos:0.0.1
 ```

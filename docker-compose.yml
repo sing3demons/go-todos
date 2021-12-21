@@ -2,9 +2,14 @@ version: '3.4'
 
 services:
   gotodos:
-    image: gotodos
+    image: gotodos:0.0.1
     build:
       context: .
       dockerfile: ./Dockerfile
     ports:
       - ${PORT}:${PORT} 
+    environment:
+      - PORT=${PORT}
+      - APP_ENV=${APP_ENV}
+    volumes:
+      - ./logs:/logs 
