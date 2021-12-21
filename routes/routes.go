@@ -19,4 +19,6 @@ func Serve(app *fiber.App) {
 
 	todoGroup := v1.Group("todos")
 	todoGroup.Get("", todoHandler.AllTodos)
+	todoGroup.Get("/:id", todoHandler.FindTodos)
+	todoGroup.Post("", todoHandler.CreateTodos)
 }

@@ -7,8 +7,10 @@ import (
 	"github.com/sing3demons/go-todos/repository"
 )
 
-type TodoService interface{
+type TodoService interface {
 	FindTodos() ([]model.Todo, error)
+	FindTodo(id uint) (*model.Todo, error)
+	CreateTodo(todo model.Todo) error
 }
 
 type todoService struct {
@@ -26,4 +28,22 @@ func (s *todoService) FindTodos() ([]model.Todo, error) {
 		return nil, err
 	}
 	return todos, nil
+}
+
+func (s *todoService) FindTodo(id uint) (*model.Todo, error) {
+	todo, err := s.repo.FindTodoByID(id)
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		return nil, err
+	}
+	return todo, nil
+}
+
+func (s *todoService) CreateTodo(todo model.Todo) error {
+	err := s.repo.InsertTodo(todo)
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		return err
+	}
+	return nil
 }

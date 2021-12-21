@@ -45,6 +45,14 @@ func main() {
 	app.Use(recover.New())
 
 	app.Get("/dashboard", monitor.New())
+	app.Static("/uploads", "./uploads")
+
+	//สร้าง folder
+	uploadDirs := [...]string{"todo", "users"}
+	for _, dir := range uploadDirs {
+		path := fmt.Sprintf("uploads/%s/images", dir)
+		os.MkdirAll(path, 0755)
+	}
 
 	if os.Getenv("APP_ENV") == "production" {
 		file, err := os.OpenFile("./logs/logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
