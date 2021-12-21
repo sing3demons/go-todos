@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   gotodos:
-    image: gotodos:0.0.1
+    image: gotodos
     build:
       context: .
       dockerfile: ./Dockerfile

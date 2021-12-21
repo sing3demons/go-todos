@@ -14,6 +14,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
+
+	"github.com/sing3demons/go-todos/routes"
 )
 
 var (
@@ -35,6 +37,7 @@ func main() {
 			log.Println("Error loading .env file")
 		}
 	}
+	// connect database
 
 	app := fiber.New()
 	app.Use(recover.New())
@@ -67,6 +70,9 @@ func main() {
 	})
 	// Readiness Probe
 	app.Get("/healthz", func(c *fiber.Ctx) error { return c.SendStatus(fiber.StatusOK) })
+
+	//Router
+	routes.Serve(app)
 
 	//Graceful Shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

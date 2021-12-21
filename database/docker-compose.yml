@@ -1,0 +1,14 @@
+version: '3.9'
+services:
+    db:
+      container_name: postgres
+      image: postgres:14.1
+      environment:
+        POSTGRES_DB: todos
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: passw0rd
+      restart: always
+      ports:
+        - 5432:5432
+      volumes:
+        - ../_data/pg_data:/var/lib/postgresql/data 
