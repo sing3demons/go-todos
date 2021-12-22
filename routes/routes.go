@@ -6,6 +6,7 @@ import (
 	"github.com/sing3demons/go-todos/handler"
 	"github.com/sing3demons/go-todos/repository"
 	"github.com/sing3demons/go-todos/service"
+	"gorm.io/gorm"
 )
 
 func Serve(app *fiber.App) {
@@ -13,12 +14,18 @@ func Serve(app *fiber.App) {
 
 	db := database.GetDB()
 
+	todoGroup := v1.Group("todos")
+	todoRouter(todoGroup, db)
+
+}
+
+func todoRouter(todoGroup fiber.Router, db *gorm.DB) {
 	todoRepository := repository.NewTodoRepository(db)
 	todoService := service.NewTodoService(todoRepository)
 	todoHandler := handler.NewtodoHandler(todoService)
 
-	todoGroup := v1.Group("todos")
 	todoGroup.Get("", todoHandler.AllTodos)
 	todoGroup.Get("/:id", todoHandler.FindTodos)
 	todoGroup.Post("", todoHandler.CreateTodos)
+	todoGroup.Delete("/:id", todoHandler.DeleteTodo)
 }

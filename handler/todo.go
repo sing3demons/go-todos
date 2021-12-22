@@ -1,11 +1,7 @@
 package handler
 
 import (
-	"fmt"
-	"log"
 	"strconv"
-	"strings"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/copier"
@@ -17,6 +13,7 @@ type TodoHandler interface {
 	AllTodos(c *fiber.Ctx) error
 	FindTodos(c *fiber.Ctx) error
 	CreateTodos(c *fiber.Ctx) error
+	DeleteTodo(c *fiber.Ctx) error
 }
 
 type todoHandler struct {
@@ -67,7 +64,7 @@ func (h *todoHandler) CreateTodos(c *fiber.Ctx) error {
 	c.BodyParser(&form)
 
 	var todo model.Todo
-	image, err := h.uploadImage(c, "todo", &todo)
+	image, err := h.uploadImage(c, "todo")
 	if err != nil {
 
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
@@ -82,24 +79,23 @@ func (h *todoHandler) CreateTodos(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-func (h *todoHandler) uploadImage(c *fiber.Ctx, name string, todo *model.Todo) (string, error) {
-	file, err := c.FormFile("image")
-	if err != nil || file == nil {
-		log.Println(err)
-		return "", err
+func (h *todoHandler) DeleteTodo(c *fiber.Ctx) error {
+	id, err := h.findTodoByID(c)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
 
-	n := time.Now().Unix()
-	s := strconv.FormatInt(n, 10)
-	filename := "uploads/" + name + "/" + "images" + "/" + strings.Replace(s, "-", "", -1)
-	// extract image extension from original file filename
-	fileExt := strings.Split(file.Filename, ".")[1]
-	// generate image from filename and extension
-	image := fmt.Sprintf("%s.%s", filename, fileExt)
-
-	if err := c.SaveFile(file, image); err != nil {
-		return "", err
+	todo, err := h.service.FindTodo(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
 
-	return image, nil
+	h.removeImage(todo.Image)
+
+	err = h.service.DeleteTodo(*todo)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(err)
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
 }
