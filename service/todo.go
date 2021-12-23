@@ -12,6 +12,7 @@ type TodoService interface {
 	FindTodo(id uint) (*model.Todo, error)
 	CreateTodo(todo model.Todo) error
 	DeleteTodo(todo model.Todo) error
+	UpdateTodo(todo model.Todo) error
 }
 
 type todoService struct {
@@ -51,6 +52,15 @@ func (s *todoService) CreateTodo(todo model.Todo) error {
 
 func (s *todoService) DeleteTodo(todo model.Todo) error {
 	err := s.repo.DeleteTodo(todo)
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (s *todoService) UpdateTodo(todo model.Todo) error {
+	err := s.repo.UpdateTodo(todo)
 	if err != nil {
 		fmt.Printf("error: %v", err)
 		return err

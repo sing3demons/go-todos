@@ -10,6 +10,7 @@ type TodoRepository interface {
 	FindTodoByID(id uint) (*model.Todo, error)
 	InsertTodo(todo model.Todo) error
 	DeleteTodo(todo model.Todo) error
+	UpdateTodo(todo model.Todo) error
 }
 
 type todoRepository struct{ DB *gorm.DB }
@@ -47,6 +48,13 @@ func (repo *todoRepository) InsertTodo(todo model.Todo) error {
 
 func (repo *todoRepository) DeleteTodo(todo model.Todo) error {
 	if err := repo.DB.Delete(&todo).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *todoRepository) UpdateTodo(todo model.Todo) error {
+	if err := repo.DB.Save(&todo).Error; err != nil {
 		return err
 	}
 	return nil

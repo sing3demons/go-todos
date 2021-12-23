@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"mime/multipart"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,8 +13,9 @@ import (
 type TodoHandler interface {
 	AllTodos(c *fiber.Ctx) error
 	FindTodos(c *fiber.Ctx) error
-	CreateTodos(c *fiber.Ctx) error
+	CreateTodo(c *fiber.Ctx) error
 	DeleteTodo(c *fiber.Ctx) error
+	UpdateTodo(c *fiber.Ctx) error
 }
 
 type todoHandler struct {
@@ -54,12 +56,12 @@ func (h *todoHandler) findTodoByID(c *fiber.Ctx) (uint, error) {
 }
 
 type insertTodo struct {
-	Title string `form:"title"`
-	Desc  string `form:"desc"`
-	Image string `form:"image"`
+	Title string                `form:"title" validate:"required"`
+	Desc  string                `form:"desc" validate:"required"`
+	Image *multipart.FileHeader `form:"image" validate:"required"`
 }
 
-func (h *todoHandler) CreateTodos(c *fiber.Ctx) error {
+func (h *todoHandler) CreateTodo(c *fiber.Ctx) error {
 	var form insertTodo
 	c.BodyParser(&form)
 
@@ -69,8 +71,9 @@ func (h *todoHandler) CreateTodos(c *fiber.Ctx) error {
 
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
 	}
-	form.Image = image
+
 	copier.Copy(&todo, &form)
+	todo.Image = image
 
 	err = h.service.CreateTodo(todo)
 	if err != nil {
@@ -96,6 +99,46 @@ func (h *todoHandler) DeleteTodo(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
+
+	return c.SendStatus(fiber.StatusNoContent)
+}
+
+type updateTodo struct {
+	Title string                `form:"title" json:"title"`
+	Desc  string                `form:"desc" json:"desc"`
+	Image *multipart.FileHeader `form:"image" json:"image"`
+}
+
+func (h *todoHandler) UpdateTodo(c *fiber.Ctx) error {
+
+	id, err := h.findTodoByID(c)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(err)
+	}
+
+	todo, err := h.service.FindTodo(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(err)
+	}
+
+	var form updateTodo
+	if err := c.BodyParser(&form); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(err)
+	}
+
+	copier.Copy(&todo, &form)
+
+	if form.Image == nil {
+		image, err := h.uploadImage(c, "todo")
+		if err != nil {
+
+			return c.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
+		}
+		h.removeImage(todo.Image)
+		todo.Image = image
+	}
+
+	h.service.UpdateTodo(*todo)
 
 	return c.SendStatus(fiber.StatusNoContent)
 }

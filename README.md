@@ -17,6 +17,7 @@ echo $?
 | GET    | /x               | ` http://127.0.0.1:8080/x`       |
 | GET    | /api/v1/todos           | ` http://127.0.0.1:8080/api/v1/todos`       |
 | GET    | /api/v1/todos/:id           | ` http://127.0.0.1:8080/api/v1/todos/:id`       |
+| DELETE    | /api/v1/todos/:id           | ` http://127.0.0.1:8080/api/v1/todos/:id`       |
 | POST    | /api/v1/todos           | ` http://127.0.0.1:8080/api/v1/todos`       |
 
 ```
