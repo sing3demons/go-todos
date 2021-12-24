@@ -1,4 +1,4 @@
-package pagination
+package model
 
 type Pagination struct {
 	Limit      int         `json:"limit,omitempty"`
