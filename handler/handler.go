@@ -15,7 +15,6 @@ type Pagination struct {
 	Limit      int         `json:"limit,omitempty"`
 	Page       int         `json:"page,omitempty"`
 	Sort       string      `json:"sort,omitempty"`
-	NextPage   int         `json:"nextPage"`
 	TotalRows  int64       `json:"total_rows"`
 	TotalPages int         `json:"total_pages"`
 	Rows       interface{} `json:"rows"`
@@ -44,9 +43,9 @@ func (h *todoHandler) uploadImage(c *fiber.Ctx, name string) (string, error) {
 		log.Println(err)
 		return "", err
 	}
-
-	n := time.Now().Unix()
-	s := strconv.FormatInt(n, 10)
+	m := time.Now().UnixMilli()
+	n := time.Now().Unix() + m
+	s := strconv.FormatInt(n, 12)
 	filename := "uploads/" + name + "/" + "images" + "/" + strings.Replace(s, "-", "", -1)
 	// extract image extension from original file filename
 	fileExt := strings.Split(file.Filename, ".")[1]

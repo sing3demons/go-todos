@@ -15,10 +15,14 @@ echo $?
 | ------ | ------------     | --------------------------------- |
 | GET    | /healthz         | ` http://127.0.0.1:8080/healthz` |
 | GET    | /x               | ` http://127.0.0.1:8080/x`       |
+
+| Method |  RelativePath     | CURL                              |
+| ------ | ------------     | --------------------------------- |
 | GET    | /api/v1/todos           | ` http://127.0.0.1:8080/api/v1/todos`       |
 | GET    | /api/v1/todos/:id           | ` http://127.0.0.1:8080/api/v1/todos/:id`       |
 | DELETE    | /api/v1/todos/:id           | ` http://127.0.0.1:8080/api/v1/todos/:id`       |
 | POST    | /api/v1/todos           | ` http://127.0.0.1:8080/api/v1/todos`       |
+| PUT    | /api/v1/todos/:id           | ` http://127.0.0.1:8080/api/v1/todos/:id`       |
 
 ```
 docker build -t gotodos:0.0.1 .

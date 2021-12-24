@@ -6,7 +6,6 @@ type Pagination struct {
 	Sort       string      `json:"sort,omitempty"`
 	TotalRows  int64       `json:"total_rows"`
 	TotalPages int         `json:"total_pages"`
-	NextPage   int         `json:"nextPage"`
 	Rows       interface{} `json:"rows"`
 }
 
