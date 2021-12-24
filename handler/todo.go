@@ -12,7 +12,7 @@ import (
 
 type TodoHandler interface {
 	AllTodos(c *fiber.Ctx) error
-	FindTodos(c *fiber.Ctx) error
+	FindTodo(c *fiber.Ctx) error
 	CreateTodo(c *fiber.Ctx) error
 	DeleteTodo(c *fiber.Ctx) error
 	UpdateTodo(c *fiber.Ctx) error
@@ -27,15 +27,21 @@ func NewtodoHandler(service service.TodoService) TodoHandler {
 }
 
 func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
-	todos, err := h.service.FindTodos()
+	limit, _ := strconv.Atoi(c.Query("limit", "24"))
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+
+	todos, paging, err := h.service.FindTodos(limit, page)
 	if err != nil {
 		return c.JSON(err)
 	}
-	return c.Status(fiber.StatusOK).JSON(todos)
+	var result Pagination
+	copier.Copy(&result, &paging)
+	result.Rows = todos
+	return c.Status(fiber.StatusOK).JSON(result)
 }
 
-func (h *todoHandler) FindTodos(c *fiber.Ctx) error {
-	id, err := h.findTodoByID(c)
+func (h *todoHandler) FindTodo(c *fiber.Ctx) error {
+	id, err := h.findByID(c)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
@@ -44,15 +50,6 @@ func (h *todoHandler) FindTodos(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
 	return c.Status(fiber.StatusOK).JSON(todo)
-}
-
-func (h *todoHandler) findTodoByID(c *fiber.Ctx) (uint, error) {
-	uid, err := strconv.ParseUint(c.Params("id"), 0, 0)
-	if err != nil {
-		return 0, err
-	}
-	id := uint(uid)
-	return id, nil
 }
 
 type insertTodo struct {
@@ -83,7 +80,7 @@ func (h *todoHandler) CreateTodo(c *fiber.Ctx) error {
 }
 
 func (h *todoHandler) DeleteTodo(c *fiber.Ctx) error {
-	id, err := h.findTodoByID(c)
+	id, err := h.findByID(c)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
@@ -104,14 +101,14 @@ func (h *todoHandler) DeleteTodo(c *fiber.Ctx) error {
 }
 
 type updateTodo struct {
-	Title string                `form:"title" json:"title"`
-	Desc  string                `form:"desc" json:"desc"`
-	Image *multipart.FileHeader `form:"image" json:"image"`
+	Title string `form:"title" json:"title"`
+	Desc  string `form:"desc" json:"desc"`
+	Image string `form:"image" json:"image"`
 }
 
 func (h *todoHandler) UpdateTodo(c *fiber.Ctx) error {
 
-	id, err := h.findTodoByID(c)
+	id, err := h.findByID(c)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
@@ -123,22 +120,27 @@ func (h *todoHandler) UpdateTodo(c *fiber.Ctx) error {
 
 	var form updateTodo
 	if err := c.BodyParser(&form); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(err)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
-
 	copier.Copy(&todo, &form)
-
-	if form.Image == nil {
+	if form.Image == "" {
 		image, err := h.uploadImage(c, "todo")
 		if err != nil {
-
-			return c.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
+			return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+				"error": err.Error(),
+			})
 		}
 		h.removeImage(todo.Image)
 		todo.Image = image
 	}
 
-	h.service.UpdateTodo(*todo)
+	if err := h.service.UpdateTodo(*todo); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
 	return c.SendStatus(fiber.StatusNoContent)
 }

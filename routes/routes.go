@@ -25,8 +25,8 @@ func todoRouter(todoGroup fiber.Router, db *gorm.DB) {
 	todoHandler := handler.NewtodoHandler(todoService)
 
 	todoGroup.Get("", todoHandler.AllTodos)
-	todoGroup.Get("/:id", todoHandler.FindTodos)
+	todoGroup.Get("/:id", todoHandler.FindTodo)
 	todoGroup.Post("", todoHandler.CreateTodo)
 	todoGroup.Delete("/:id", todoHandler.DeleteTodo)
-	todoGroup.Put("/:id",todoHandler.UpdateTodo)
+	todoGroup.Put("/:id", todoHandler.UpdateTodo)
 }

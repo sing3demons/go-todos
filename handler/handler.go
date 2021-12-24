@@ -11,12 +11,31 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type Pagination struct {
+	Limit      int         `json:"limit,omitempty"`
+	Page       int         `json:"page,omitempty"`
+	Sort       string      `json:"sort,omitempty"`
+	NextPage   int         `json:"nextPage"`
+	TotalRows  int64       `json:"total_rows"`
+	TotalPages int         `json:"total_pages"`
+	Rows       interface{} `json:"rows"`
+}
+
 func (h *todoHandler) removeImage(path string) error {
 	if path != "" {
 		pwd, _ := os.Getwd()
 		os.Remove(pwd + "/" + path)
 	}
 	return nil
+}
+
+func (h *todoHandler) findByID(c *fiber.Ctx) (uint, error) {
+	uid, err := strconv.ParseUint(c.Params("id"), 0, 0)
+	if err != nil {
+		return 0, err
+	}
+	id := uint(uid)
+	return id, nil
 }
 
 func (h *todoHandler) uploadImage(c *fiber.Ctx, name string) (string, error) {

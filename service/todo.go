@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/sing3demons/go-todos/model"
+	"github.com/sing3demons/go-todos/pagination"
 	"github.com/sing3demons/go-todos/repository"
 )
 
 type TodoService interface {
-	FindTodos() ([]model.Todo, error)
+	FindTodos(limit int, page int) ([]model.Todo, *pagination.Pagination, error)
 	FindTodo(id uint) (*model.Todo, error)
 	CreateTodo(todo model.Todo) error
 	DeleteTodo(todo model.Todo) error
@@ -23,13 +24,13 @@ func NewTodoService(repo repository.TodoRepository) TodoService {
 	return &todoService{repo: repo}
 }
 
-func (s *todoService) FindTodos() ([]model.Todo, error) {
-	todos, err := s.repo.AllTodos()
+func (s *todoService) FindTodos(limit int, page int) ([]model.Todo, *pagination.Pagination, error) {
+	todos, paging, err := s.repo.AllTodos(limit, page)
 	if err != nil {
 		fmt.Printf("error: %v", err)
-		return nil, err
+		return nil, nil, err
 	}
-	return todos, nil
+	return todos, paging, nil
 }
 
 func (s *todoService) FindTodo(id uint) (*model.Todo, error) {
