@@ -17,6 +17,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/sing3demons/go-todos/database"
+	"github.com/sing3demons/go-todos/redis"
 	"github.com/sing3demons/go-todos/routes"
 )
 
@@ -88,7 +89,14 @@ func main() {
 	app.Get("/healthz", func(c *fiber.Ctx) error { return c.SendStatus(fiber.StatusOK) })
 
 	//Router
-	routes.Serve(app)
+	db := database.GetDB()
+	redis := redis.NewCacher(&redis.CacherConfig{})
+	r := routes.Router{
+		App:   app,
+		DB:    db,
+		Redis: redis,
+	}
+	r.Serve()
 
 	//Graceful Shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

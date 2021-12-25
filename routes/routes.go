@@ -2,25 +2,29 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/sing3demons/go-todos/database"
 	"github.com/sing3demons/go-todos/handler"
+	"github.com/sing3demons/go-todos/redis"
 	"github.com/sing3demons/go-todos/repository"
 	"github.com/sing3demons/go-todos/service"
 	"gorm.io/gorm"
 )
 
-func Serve(app *fiber.App) {
-	v1 := app.Group("/api/v1/")
+type Router struct {
+	App   *fiber.App
+	DB    *gorm.DB
+	Redis *redis.Cacher
+}
 
-	db := database.GetDB()
+func (r *Router) Serve() {
+	v1 := r.App.Group("/api/v1/")
 
 	todoGroup := v1.Group("todos")
-	todoRouter(todoGroup, db)
+	r.todoRouter(todoGroup)
 
 }
 
-func todoRouter(todoGroup fiber.Router, db *gorm.DB) {
-	todoRepository := repository.NewTodoRepository(db)
+func (r *Router) todoRouter(todoGroup fiber.Router) {
+	todoRepository := repository.NewTodoRepository(r.DB)
 	todoService := service.NewTodoService(todoRepository)
 	todoHandler := handler.NewtodoHandler(todoService)
 

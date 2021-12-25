@@ -28,7 +28,7 @@ func (repo *todoRepository) AllTodos(limit int, page int) ([]model.Todo, *model.
 		Page:  page,
 	}
 
-	if err := repo.DB.Scopes(paginate(&todos, &pagination, repo.DB)).Find(&todos).Error; err != nil {
+	if err := repo.DB.Scopes(repo.paginate(&todos, &pagination)).Find(&todos).Error; err != nil {
 		return nil, nil, err
 	}
 
