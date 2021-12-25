@@ -1,5 +1,7 @@
 package model
 
+
+// : https://dev.to/rafaelgfirmino/pagination-using-gorm-scopes-3k5f
 type Pagination struct {
 	Limit      int         `json:"limit,omitempty"`
 	Page       int         `json:"page,omitempty"`

@@ -41,6 +41,7 @@ func main() {
 	}
 	// connect database
 	database.InitDB()
+	// seeds.Load()
 
 	app := fiber.New()
 	app.Use(recover.New())
