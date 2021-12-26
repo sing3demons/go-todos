@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"strconv"
 	"time"
@@ -35,39 +36,69 @@ func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
 	limit, _ := strconv.Atoi(c.Query("limit", "24"))
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 
-	keyTodo := "todo::all"
-	keyPage := "todo::page"
+	query1CacheKey := "todo::all"
+	query2CacheKey := "todo::page"
 
-	cacheItems, err := h.cache.Get(keyTodo)
-	if err != nil {
-		fmt.Println(err)
-	}
-	cachePage, err := h.cache.Get(keyPage)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if len(cacheItems) > 0 && len(cachePage) > 0 {
-		fmt.Println("redis ")
-		var todos []model.Todo
-		var paging model.Pagination
-		json.Unmarshal([]byte(cacheItems), &todos)
-		json.Unmarshal([]byte(cachePage), &paging)
-
-		var result Pagination
-		copier.Copy(&result, &paging)
-		result.Rows = todos
-		return c.Status(fiber.StatusOK).JSON(result)
-	}
-
-	todos, paging, err := h.service.FindTodos(limit, page)
+	cacheItems, err := h.cache.MGet([]string{query1CacheKey, query2CacheKey})
 	if err != nil {
 		return c.JSON(err)
 	}
-	timeToExpire := 10 * time.Second
-	h.cache.Set(keyTodo, todos, timeToExpire)
 
-	h.cache.Set(keyPage, paging, timeToExpire)
+	todoJS := cacheItems[0]
+	pageJS := cacheItems[1]
+
+	var todos []model.Todo
+	var paging *model.Pagination
+
+	if todoJS != nil && len(todoJS.(string)) > 0 {
+		fmt.Println("redis todo")
+		err := json.Unmarshal([]byte(todoJS.(string)), &todos)
+		if err != nil {
+			h.cache.Del()
+			log.Printf("redis: %v", err)
+		}
+	}
+
+	itemToCaches := map[string]interface{}{}
+	
+	if todoJS == nil {
+		todos, paging, err = h.service.FindTodos(limit, page)
+		if err != nil {
+			return c.JSON(err)
+		}
+		itemToCaches[query1CacheKey] = todos
+	}
+
+	if pageJS != nil && len(pageJS.(string)) > 0 {
+		fmt.Println("redis page")
+		err := json.Unmarshal([]byte(pageJS.(string)), &paging)
+		if err != nil {
+			h.cache.Del(query2CacheKey)
+			log.Println(err.Error())
+		}
+	}
+
+	if pageJS == nil {
+		itemToCaches[query2CacheKey] = paging
+	}
+
+	if len(itemToCaches) > 0 {
+		timeToExpire := 10 * time.Second
+		err := h.cache.MSet(itemToCaches)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		// Set time to expire
+		keys := []string{}
+		for k := range itemToCaches {
+			keys = append(keys, k)
+		}
+		err = h.cache.Expires(keys, timeToExpire)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}
 
 	var result Pagination
 	copier.Copy(&result, &paging)

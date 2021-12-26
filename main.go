@@ -26,6 +26,10 @@ var (
 	buildtime   = time.Now().String()
 )
 
+func NewCacherConfig() *redis.CacherConfig {
+	return &redis.CacherConfig{}
+}
+
 func main() {
 	// Liveness Probe
 	_, err := os.Create("/tmp/live")
@@ -90,7 +94,7 @@ func main() {
 
 	//Router
 	db := database.GetDB()
-	redis := redis.NewCacher(&redis.CacherConfig{})
+	redis := redis.NewCacher(NewCacherConfig())
 	r := routes.Router{
 		App:   app,
 		DB:    db,
