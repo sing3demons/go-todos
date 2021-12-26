@@ -26,7 +26,7 @@ func (r *Router) Serve() {
 func (r *Router) todoRouter(todoGroup fiber.Router) {
 	todoRepository := repository.NewTodoRepository(r.DB)
 	todoService := service.NewTodoService(todoRepository)
-	todoHandler := handler.NewtodoHandler(todoService)
+	todoHandler := handler.NewtodoHandler(todoService, r.Redis)
 
 	todoGroup.Get("", todoHandler.AllTodos)
 	todoGroup.Get("/:id", todoHandler.FindTodo)

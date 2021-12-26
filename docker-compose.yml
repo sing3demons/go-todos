@@ -1,7 +1,18 @@
 version: '3.4'
 
 services:
-  gotodos:
+  redis:
+      container_name: redis
+      image: redis:6.2.6-alpine
+      environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      ports:
+      - 6379:6379
+      volumes:
+       - ./_data/redis:/data
+       - ./config/redis_cfg/redis.conf:/redis.conf
+      command: redis-server /redis.conf
+  webapi:
     image: gotodos:0.0.1
     build:
       context: .
@@ -16,6 +27,7 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_PORT=${DB_PORT}
       - DB_HOST=${DB_HOSTV2}
+      - REDIS_HOST=${DB_HOSTV2}
     volumes:
       - ./logs:/logs 
       - ./uploads:/uploads

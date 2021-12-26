@@ -1,12 +1,16 @@
 package handler
 
 import (
+	"encoding/json"
+	"fmt"
 	"mime/multipart"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/copier"
 	"github.com/sing3demons/go-todos/model"
+	"github.com/sing3demons/go-todos/redis"
 	"github.com/sing3demons/go-todos/service"
 )
 
@@ -20,23 +24,55 @@ type TodoHandler interface {
 
 type todoHandler struct {
 	service service.TodoService
+	cache   *redis.Cacher
 }
 
-func NewtodoHandler(service service.TodoService) TodoHandler {
-	return &todoHandler{service: service}
+func NewtodoHandler(service service.TodoService, cache *redis.Cacher) TodoHandler {
+	return &todoHandler{service: service, cache: cache}
 }
 
 func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
 	limit, _ := strconv.Atoi(c.Query("limit", "24"))
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 
+	keyTodo := "todo::all"
+	keyPage := "todo::page"
+
+	cacheItems, err := h.cache.Get(keyTodo)
+	if err != nil {
+		fmt.Println(err)
+	}
+	cachePage, err := h.cache.Get(keyPage)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if len(cacheItems) > 0 && len(cachePage) > 0 {
+		fmt.Println("redis ")
+		var todos []model.Todo
+		var paging model.Pagination
+		json.Unmarshal([]byte(cacheItems), &todos)
+		json.Unmarshal([]byte(cachePage), &paging)
+
+		var result Pagination
+		copier.Copy(&result, &paging)
+		result.Rows = todos
+		return c.Status(fiber.StatusOK).JSON(result)
+	}
+
 	todos, paging, err := h.service.FindTodos(limit, page)
 	if err != nil {
 		return c.JSON(err)
 	}
+	timeToExpire := 10 * time.Second
+	h.cache.Set(keyTodo, todos, timeToExpire)
+
+	h.cache.Set(keyPage, paging, timeToExpire)
+
 	var result Pagination
 	copier.Copy(&result, &paging)
 	result.Rows = todos
+
 	return c.Status(fiber.StatusOK).JSON(result)
 }
 
