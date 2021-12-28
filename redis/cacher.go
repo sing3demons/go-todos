@@ -53,11 +53,11 @@ func (cache *Cacher) MSet(kv map[string]interface{}) error {
 			continue
 		}
 
-		strb, err := json.Marshal(v)
+		strbyte, err := json.Marshal(v)
 		if err != nil {
 			return err
 		}
-		pairs = append(pairs, k, strb)
+		pairs = append(pairs, k, strbyte)
 	}
 
 	err = c.MSet(context.Background(), pairs...).Err()

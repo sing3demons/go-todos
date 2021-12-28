@@ -26,8 +26,13 @@ var (
 	buildtime   = time.Now().String()
 )
 
-func NewCacherConfig() *redis.CacherConfig {
-	return &redis.CacherConfig{}
+func init() {
+	if os.Getenv("APP_ENV") != "production" {
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Println("Error loading .env file")
+		}
+	}
 }
 
 func main() {
@@ -38,12 +43,6 @@ func main() {
 	}
 	defer os.Remove("/tmp/live")
 
-	if os.Getenv("APP_ENV") != "production" {
-		err := godotenv.Load(".env")
-		if err != nil {
-			log.Println("Error loading .env file")
-		}
-	}
 	// connect database
 	database.InitDB()
 	// seeds.Load()
@@ -94,7 +93,7 @@ func main() {
 
 	//Router
 	db := database.GetDB()
-	redis := redis.NewCacher(NewCacherConfig())
+	redis := redis.NewCacher(&redis.CacherConfig{})
 	r := routes.Router{
 		App:   app,
 		DB:    db,
@@ -102,12 +101,7 @@ func main() {
 	}
 	r.Serve()
 
-	gracefulShutdown(app)
-
-}
-
-//Graceful Shutdown
-func gracefulShutdown(app *fiber.App) {
+	//Graceful Shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
@@ -125,4 +119,5 @@ func gracefulShutdown(app *fiber.App) {
 	if err := app.Shutdown(); err != nil {
 		fmt.Println(err)
 	}
+
 }

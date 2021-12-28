@@ -9,18 +9,6 @@ import (
 	redis "github.com/go-redis/redis/v8"
 )
 
-// ICacher is the interface for cache service
-type ICacher interface {
-	Set(key string, value interface{}, expire time.Duration) error
-	MSet(kv map[string]interface{}) error
-	Get(key string) (string, error)
-	MGet(keys []string) ([]interface{}, error)
-	Expire(key string, expire time.Duration) error
-	Expires(keys []string, expire time.Duration) error
-	Del(keys ...string) error
-	Exists(key string) (bool, error)
-	Close() error
-}
 
 // Cacher is the struct for cache service
 type Cacher struct {
