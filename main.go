@@ -65,7 +65,8 @@ func main() {
 	}
 
 	if os.Getenv("APP_ENV") == "production" {
-		file, err := os.OpenFile("./logs/logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		uri := "./logs/logs.log"
+		file, err := os.OpenFile(uri, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatalf("error opening file: %v", err)
 		}
@@ -73,13 +74,16 @@ func main() {
 
 		app.Use(logger.New(logger.Config{
 			Output:       file,
-			Format:       "[${time}], ${status} - ${latency}, ip:(${ip}:${pid}), ${method}, ${path}\n",
+			Format:       "[${time}], ${status} - ${latency}, ${ip}:${pid}, ${method}, ${path},\n",
 			Next:         nil,
 			TimeFormat:   "15:04:05",
 			TimeZone:     "Local",
 			TimeInterval: 500 * time.Millisecond,
 		}))
+
 	}
+
+	app.Get("/log", downloadLogFile)
 
 	app.Use(logger.New(logger.ConfigDefault))
 	app.Get("/x", func(c *fiber.Ctx) error {
@@ -95,9 +99,9 @@ func main() {
 	db := database.GetDB()
 	redis := redis.NewCacher(&redis.CacherConfig{})
 	r := routes.Router{
-		App:   app,
-		DB:    db,
-		Redis: redis,
+		App:    app,
+		DB:     db,
+		Cacher: redis,
 	}
 	r.Serve()
 
@@ -106,7 +110,7 @@ func main() {
 	defer stop()
 
 	go func() {
-		if err := app.Listen(":" + os.Getenv("PORT")); err != nil {
+		if err := r.App.Listen(":" + os.Getenv("PORT")); err != nil {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
@@ -120,4 +124,25 @@ func main() {
 		fmt.Println(err)
 	}
 
+}
+
+func downloadLogFile(c *fiber.Ctx) error {
+	url := "./logs/logs.log"
+
+	// resp, err := os.Open(url)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// defer resp.Close()
+
+	// body, err := ioutil.ReadAll(resp)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// data := []byte("")
+
+	// fmt.Println(string(body))
+	// os.WriteFile(url, data, 0666)
+
+	return c.Download(url, "log")
 }

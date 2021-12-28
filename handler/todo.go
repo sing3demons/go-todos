@@ -51,7 +51,6 @@ func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
 	var paging *model.Pagination
 
 	if todoJS != nil && len(todoJS.(string)) > 0 {
-		fmt.Println("redis todo")
 		err := json.Unmarshal([]byte(todoJS.(string)), &todos)
 		if err != nil {
 			h.cache.Del()
@@ -60,7 +59,7 @@ func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
 	}
 
 	itemToCaches := map[string]interface{}{}
-	
+
 	if todoJS == nil {
 		todos, paging, err = h.service.FindTodos(limit, page)
 		if err != nil {
@@ -70,7 +69,6 @@ func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
 	}
 
 	if pageJS != nil && len(pageJS.(string)) > 0 {
-		fmt.Println("redis page")
 		err := json.Unmarshal([]byte(pageJS.(string)), &paging)
 		if err != nil {
 			h.cache.Del(query2CacheKey)
@@ -83,6 +81,7 @@ func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
 	}
 
 	if len(itemToCaches) > 0 {
+		fmt.Println("MSet")
 		timeToExpire := 10 * time.Second
 		err := h.cache.MSet(itemToCaches)
 		if err != nil {

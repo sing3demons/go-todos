@@ -10,9 +10,9 @@ import (
 )
 
 type Router struct {
-	App   *fiber.App
-	DB    *gorm.DB
-	Redis *redis.Cacher
+	*fiber.App
+	*gorm.DB
+	*redis.Cacher
 }
 
 func (r *Router) Serve() {
@@ -26,7 +26,7 @@ func (r *Router) Serve() {
 func (r *Router) todoRouter(todoGroup fiber.Router) {
 	todoRepository := repository.NewTodoRepository(r.DB)
 	todoService := service.NewTodoService(todoRepository)
-	todoHandler := handler.NewtodoHandler(todoService, r.Redis)
+	todoHandler := handler.NewtodoHandler(todoService, r.Cacher)
 
 	todoGroup.Get("", todoHandler.AllTodos)
 	todoGroup.Get("/:id", todoHandler.FindTodo)

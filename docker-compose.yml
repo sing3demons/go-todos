@@ -31,5 +31,3 @@ services:
     volumes:
       - ./logs:/logs 
       - ./uploads:/uploads
-    links:
-      - db
