@@ -102,7 +102,12 @@ func main() {
 	}
 	r.Serve()
 
-	//Graceful Shutdown
+	gracefulShutdown(app)
+
+}
+
+//Graceful Shutdown
+func gracefulShutdown(app *fiber.App) {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
