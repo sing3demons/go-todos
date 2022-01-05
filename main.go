@@ -16,8 +16,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 
+	"github.com/sing3demons/go-todos/cache"
 	"github.com/sing3demons/go-todos/database"
-	"github.com/sing3demons/go-todos/redis"
 	"github.com/sing3demons/go-todos/routes"
 )
 
@@ -97,7 +97,7 @@ func main() {
 
 	//Router
 	db := database.GetDB()
-	redis := redis.NewCacher(&redis.CacherConfig{})
+	redis := cache.NewCacher(&cache.CacherConfig{})
 	r := routes.Router{
 		App:    app,
 		DB:     db,

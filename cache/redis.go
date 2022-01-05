@@ -1,4 +1,4 @@
-package redis
+package cache
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	redis "github.com/go-redis/redis/v8"
 )
-
 
 // Cacher is the struct for cache service
 type Cacher struct {

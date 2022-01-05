@@ -11,7 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/copier"
 	"github.com/sing3demons/go-todos/model"
-	"github.com/sing3demons/go-todos/redis"
+	"github.com/sing3demons/go-todos/cache"
 	"github.com/sing3demons/go-todos/service"
 )
 
@@ -25,10 +25,10 @@ type TodoHandler interface {
 
 type todoHandler struct {
 	service service.TodoService
-	cache   *redis.Cacher
+	cache   *cache.Cacher
 }
 
-func NewtodoHandler(service service.TodoService, cache *redis.Cacher) TodoHandler {
+func NewtodoHandler(service service.TodoService, cache *cache.Cacher) TodoHandler {
 	return &todoHandler{service: service, cache: cache}
 }
 

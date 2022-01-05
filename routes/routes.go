@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/sing3demons/go-todos/cache"
 	"github.com/sing3demons/go-todos/handler"
-	"github.com/sing3demons/go-todos/redis"
 	"github.com/sing3demons/go-todos/repository"
 	"github.com/sing3demons/go-todos/service"
 	"gorm.io/gorm"
@@ -12,7 +12,7 @@ import (
 type Router struct {
 	*fiber.App
 	*gorm.DB
-	*redis.Cacher
+	*cache.Cacher
 }
 
 func (r *Router) Serve() {
