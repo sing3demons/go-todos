@@ -21,11 +21,22 @@ func (r *Router) Serve() {
 	todoGroup := v1.Group("todos")
 	r.todoRouter(todoGroup)
 
+	authGroup := v1.Group("auth")
+	r.authRouter(authGroup)
+
+}
+
+func (r *Router) authRouter(authGroup fiber.Router) {
+	repository := repository.NewUserRepository(r.DB)
+	service := service.NewUserService(repository)
+	handler := handler.NewUserHandler(service)
+
+	authGroup.Post("/sign-up", handler.Register)
 }
 
 func (r *Router) todoRouter(todoGroup fiber.Router) {
-	todoRepository := repository.NewTodoRepository(r.DB)
-	todoService := service.NewTodoService(todoRepository)
+	repository := repository.NewTodoRepository(r.DB)
+	todoService := service.NewTodoService(repository)
 	todoHandler := handler.NewtodoHandler(todoService, r.Cacher)
 
 	todoGroup.Get("", todoHandler.AllTodos)

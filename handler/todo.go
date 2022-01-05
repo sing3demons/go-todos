@@ -36,8 +36,9 @@ func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
 	limit, _ := strconv.Atoi(c.Query("limit", "24"))
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 
-	query1CacheKey := "todo::all"
-	query2CacheKey := "todo::page"
+	str := fmt.Sprintf("::%d::%d", limit, page)
+	query1CacheKey := "todo::all" + str
+	query2CacheKey := "todo::page" + str
 
 	cacheItems, err := h.cache.MGet([]string{query1CacheKey, query2CacheKey})
 	if err != nil {

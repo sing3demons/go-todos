@@ -36,6 +36,12 @@ docker run --rm -p 8080:8080 -e PORT=8080 -e APP_ENV=dev -e DB_USER=postgres \
 -v $(pwd)/logs:/logs -v $(pwd)/uploads:/uploads --name gotodos gotodos:0.0.1
 ```
 
+```
+ curl -X POST -H "Content-Type: application/json" \
+	  --data "{\"email\":\"sing@dev.com\",\"password\":\"passw0rd\"}" \
+	  http://localhost:8080/api/v1/auth/sign-up
+```
+
 
 ## ```build database```
 ```

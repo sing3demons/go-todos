@@ -4,7 +4,8 @@ import "gorm.io/gorm"
 
 type Todo struct {
 	gorm.Model
-	Title string `gorm:"not null"`
-	Desc  string
-	Image string
+	Title  string `gorm:"not null"`
+	Desc   string
+	Image  string
+	UserID uint
 }

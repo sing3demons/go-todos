@@ -25,6 +25,7 @@ func InitDB() {
 	}
 	// database.Migrator().DropTable(&model.Todo{})
 	database.AutoMigrate(&model.Todo{})
+	database.AutoMigrate(&model.User{})
 
 	db = database
 }
