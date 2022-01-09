@@ -10,10 +10,16 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/copier"
-	"github.com/sing3demons/go-todos/model"
 	"github.com/sing3demons/go-todos/cache"
+	"github.com/sing3demons/go-todos/model"
 	"github.com/sing3demons/go-todos/service"
 )
+
+type insertTodo struct {
+	Title string                `form:"title" validate:"required"`
+	Desc  string                `form:"desc" validate:"required"`
+	Image *multipart.FileHeader `form:"image" validate:"required"`
+}
 
 type TodoHandler interface {
 	AllTodos(c *fiber.Ctx) error
@@ -117,12 +123,6 @@ func (h *todoHandler) FindTodo(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
 	return c.Status(fiber.StatusOK).JSON(todo)
-}
-
-type insertTodo struct {
-	Title string                `form:"title" validate:"required"`
-	Desc  string                `form:"desc" validate:"required"`
-	Image *multipart.FileHeader `form:"image" validate:"required"`
 }
 
 func (h *todoHandler) CreateTodo(c *fiber.Ctx) error {

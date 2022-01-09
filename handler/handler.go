@@ -60,15 +60,13 @@ func (h *todoHandler) uploadImage(c *fiber.Ctx, name string) (string, error) {
 	return image, nil
 }
 
-
-
 type ErrorResponse struct {
 	FailedField string
 	Tag         string
 	Value       string
 }
 
-func ValidateStruct(user Register) []*ErrorResponse {
+func ValidateStruct(user interface{}) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
 	err := validate.Struct(user)
@@ -82,4 +80,12 @@ func ValidateStruct(user Register) []*ErrorResponse {
 		}
 	}
 	return errors
+}
+
+type userResponse struct {
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Avatar    string `json:"avatar"`
+	Role      string `json:"role"`
 }

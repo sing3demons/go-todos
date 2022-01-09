@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/sing3demons/go-todos/cache"
 	"github.com/sing3demons/go-todos/handler"
+	"github.com/sing3demons/go-todos/middleware"
 	"github.com/sing3demons/go-todos/repository"
 	"github.com/sing3demons/go-todos/service"
 	"gorm.io/gorm"
@@ -31,7 +32,13 @@ func (r *Router) authRouter(authGroup fiber.Router) {
 	service := service.NewUserService(repository)
 	handler := handler.NewUserHandler(service)
 
+	authenticate := middleware.JwtVerify()
+
 	authGroup.Post("/sign-up", handler.Register)
+	authGroup.Post("/sign-in", handler.Login)
+	authGroup.Use(authenticate)
+	authGroup.Get("/user", handler.Profile)
+	authGroup.Get("/users", handler.FindUsers)
 }
 
 func (r *Router) todoRouter(todoGroup fiber.Router) {
