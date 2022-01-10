@@ -1,15 +1,11 @@
 package handler
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/copier"
 	"github.com/sing3demons/go-todos/middleware"
 	"github.com/sing3demons/go-todos/model"
 	"github.com/sing3demons/go-todos/service"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type UserHandler interface {
@@ -84,7 +80,7 @@ func (h *userHandler) Login(c *fiber.Ctx) error {
 			"message": "Invalid username or password",
 		})
 	}
-	if err := h.compareHashAndPassword(user.Password, u.Password); err != nil {
+	if err := compareHashAndPassword(user.Password, u.Password); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "Invalid username or password",
 		})
@@ -95,40 +91,32 @@ func (h *userHandler) Login(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
-	return c.JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"token": token,
 	})
 }
 
 func (h *userHandler) Profile(c *fiber.Ctx) error {
 	user := c.Locals("sub").(model.User)
+
 	var serializedUser userResponse
 	copier.Copy(&serializedUser, &user)
-	return c.JSON(serializedUser)
+	return c.Status(fiber.StatusOK).JSON(serializedUser)
 }
 
 func (h *userHandler) FindUsers(c *fiber.Ctx) error {
 	sub := c.Locals("sub").(model.User)
-	if sub.Role == "Member" {
-		fmt.Println("member")
+	if sub.Role == "Admin" {
+		users, err := h.service.FindByUsers()
+		if err != nil {
+			return c.Status(fiber.StatusUnprocessableEntity).JSON(err)
+		}
+
+		serializedUser := []userResponse{}
+		copier.Copy(&serializedUser, &users)
+
+		return c.Status(fiber.StatusOK).JSON(serializedUser)
 	}
+	return c.SendStatus(fiber.StatusForbidden)
 
-	users, err := h.service.FindByUsers()
-	if err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(err)
-	}
-
-	serializedUser := []userResponse{}
-	copier.Copy(&serializedUser, &users)
-
-	return c.Status(fiber.StatusOK).JSON(serializedUser)
-}
-
-func (h *userHandler) compareHashAndPassword(hash string, password string) error {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	if err != nil {
-		log.Printf("bcrypt, error: %v", err)
-		return err
-	}
-	return nil
 }

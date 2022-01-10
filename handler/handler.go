@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Pagination struct {
@@ -29,7 +30,7 @@ func (h *todoHandler) removeImage(path string) error {
 	return nil
 }
 
-func (h *todoHandler) findByID(c *fiber.Ctx) (uint, error) {
+func findByID(c *fiber.Ctx) (uint, error) {
 	uid, err := strconv.ParseUint(c.Params("id"), 0, 0)
 	if err != nil {
 		return 0, err
@@ -38,7 +39,7 @@ func (h *todoHandler) findByID(c *fiber.Ctx) (uint, error) {
 	return id, nil
 }
 
-func (h *todoHandler) uploadImage(c *fiber.Ctx, name string) (string, error) {
+func uploadImage(c *fiber.Ctx, name string) (string, error) {
 	file, err := c.FormFile("image")
 	if err != nil || file == nil {
 		log.Println(err)
@@ -80,6 +81,15 @@ func ValidateStruct(user interface{}) []*ErrorResponse {
 		}
 	}
 	return errors
+}
+
+func compareHashAndPassword(hash string, password string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	if err != nil {
+		log.Printf("bcrypt, error: %v", err)
+		return err
+	}
+	return nil
 }
 
 type userResponse struct {

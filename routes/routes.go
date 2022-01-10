@@ -25,6 +25,18 @@ func (r *Router) Serve() {
 	authGroup := v1.Group("auth")
 	r.authRouter(authGroup)
 
+	userGroup := v1.Group("users")
+	r.userRouter(userGroup)
+
+}
+
+func (r *Router) userRouter(userGroup fiber.Router) {
+	repository := repository.NewUserRepository(r.DB)
+	service := service.NewUserService(repository)
+	handler := handler.NewUserHandler(service)
+
+	authenticate := middleware.JwtVerify()
+	userGroup.Get("/users", authenticate, handler.FindUsers)
 }
 
 func (r *Router) authRouter(authGroup fiber.Router) {
@@ -37,8 +49,7 @@ func (r *Router) authRouter(authGroup fiber.Router) {
 	authGroup.Post("/sign-up", handler.Register)
 	authGroup.Post("/sign-in", handler.Login)
 	authGroup.Use(authenticate)
-	authGroup.Get("/user", handler.Profile)
-	authGroup.Get("/users", handler.FindUsers)
+	authGroup.Get("/profile", handler.Profile)
 }
 
 func (r *Router) todoRouter(todoGroup fiber.Router) {

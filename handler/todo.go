@@ -114,7 +114,7 @@ func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
 }
 
 func (h *todoHandler) FindTodo(c *fiber.Ctx) error {
-	id, err := h.findByID(c)
+	id, err := findByID(c)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
@@ -130,7 +130,7 @@ func (h *todoHandler) CreateTodo(c *fiber.Ctx) error {
 	c.BodyParser(&form)
 
 	var todo model.Todo
-	image, err := h.uploadImage(c, "todo")
+	image, err := uploadImage(c, "todo")
 	if err != nil {
 
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
@@ -147,7 +147,7 @@ func (h *todoHandler) CreateTodo(c *fiber.Ctx) error {
 }
 
 func (h *todoHandler) DeleteTodo(c *fiber.Ctx) error {
-	id, err := h.findByID(c)
+	id, err := findByID(c)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
@@ -175,7 +175,7 @@ type updateTodo struct {
 
 func (h *todoHandler) UpdateTodo(c *fiber.Ctx) error {
 
-	id, err := h.findByID(c)
+	id, err := findByID(c)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(err)
 	}
@@ -193,7 +193,7 @@ func (h *todoHandler) UpdateTodo(c *fiber.Ctx) error {
 	}
 	copier.Copy(&todo, &form)
 	if form.Image == "" {
-		image, err := h.uploadImage(c, "todo")
+		image, err := uploadImage(c, "todo")
 		if err != nil {
 			return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
 				"error": err.Error(),
