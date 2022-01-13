@@ -104,19 +104,26 @@ func (h *userHandler) Profile(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(serializedUser)
 }
 
-func (h *userHandler) FindUsers(c *fiber.Ctx) error {
-	sub := c.Locals("sub").(model.User)
-	if sub.Role == "Admin" {
-		users, err := h.service.FindByUsers()
-		if err != nil {
-			return c.Status(fiber.StatusUnprocessableEntity).JSON(err)
+func Authorization() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		sub := c.Locals("sub").(model.User)
+		if sub.Role == "Admin" || sub.Role == "Editor" {
+			return c.Next()
 		}
-
-		serializedUser := []userResponse{}
-		copier.Copy(&serializedUser, &users)
-
-		return c.Status(fiber.StatusOK).JSON(serializedUser)
+		return c.SendStatus(fiber.StatusForbidden)
 	}
-	return c.SendStatus(fiber.StatusForbidden)
+}
+
+func (h *userHandler) FindUsers(c *fiber.Ctx) error {
+	Authorization()
+	users, err := h.service.FindByUsers()
+	if err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(err)
+	}
+
+	serializedUser := []userResponse{}
+	copier.Copy(&serializedUser, &users)
+
+	return c.Status(fiber.StatusOK).JSON(serializedUser)
 
 }

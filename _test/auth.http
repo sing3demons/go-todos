@@ -1,6 +1,6 @@
-@apiUrl=http://127.0.0.1:8080/api/v1/auth
+@apiUrl=http://127.0.0.1:8080/api/v1
 ### Login 
-POST {{apiUrl}}/sign-in HTTP/1.1
+POST {{apiUrl}}/auth/sign-in HTTP/1.1
 Content-Type: application/json
 
 {
@@ -9,7 +9,7 @@ Content-Type: application/json
 }
 
 ### Register 
-POST {{apiUrl}}/sign-up HTTP/1.1
+POST {{apiUrl}}/auth/sign-up HTTP/1.1
 Content-Type: application/json
 
 {
@@ -22,4 +22,4 @@ Content-Type: application/json
 
 ### User
 GET {{apiUrl}}/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDE4MTgwNzYsImlhdCI6MTY0MTczMTY3Niwic3ViIjoiOCJ9.95FV0jRN4Pu5kCnh4bUDx9w-spQFCv6oIBQbvXrmkQU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDIyMDQxMjMsImlhdCI6MTY0MjExNzcyMywic3ViIjoiOCJ9.bTgB5VSMD1pvO-GzRp9eUQbNVE4vkTlvQqeiaXE0wNk
