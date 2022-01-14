@@ -104,18 +104,9 @@ func (h *userHandler) Profile(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(serializedUser)
 }
 
-func Authorization() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		sub := c.Locals("sub").(model.User)
-		if sub.Role == "Admin" || sub.Role == "Editor" {
-			return c.Next()
-		}
-		return c.SendStatus(fiber.StatusForbidden)
-	}
-}
+
 
 func (h *userHandler) FindUsers(c *fiber.Ctx) error {
-	Authorization()
 	users, err := h.service.FindByUsers()
 	if err != nil {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(err)

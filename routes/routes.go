@@ -36,7 +36,8 @@ func (r *Router) userRouter(userGroup fiber.Router) {
 	handler := handler.NewUserHandler(service)
 
 	authenticate := middleware.JwtVerify()
-	userGroup.Get("/", authenticate, handler.FindUsers)
+	author := middleware.Authorization()
+	userGroup.Get("/", authenticate, author, handler.FindUsers)
 }
 
 func (r *Router) authRouter(authGroup fiber.Router) {
