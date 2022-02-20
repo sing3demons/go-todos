@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gotodos
+  namespace: gotodos
+spec:
+  selector:
+    matchLabels:
+      app: gotodos
+  template:
+    metadata:
+      labels:
+        app: gotodos
+    spec:
+      containers:
+      - name: gotodos
+        image: sing3demons/gotodos:0.0.2
+        resources:
+        ports:
+          - containerPort: 8080
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        livenessProbe:
+          exec:
+            command:
+              - cat
+              - /tmp/live
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 5
+        env:
+          - name: PORT
+            value: "8080"
+          - name: DSN
+            value: host=postgres-service.postgres user=postgresadmin password=admin123 dbname=postgresdb port=5432 sslmode=disable TimeZone=Asia/Bangkok
+            # valueFrom:
+            #   secretKeyRef:
+            #     key: pghost
+            #     name: go-secret
+          - name: APP_ENV
+            value: production
+        volumeMounts:
+          - mountPath: /uploads
+            name: go-todo
+      volumes:
+        - name: go-todo
+          persistentVolumeClaim:
+            claimName: gotodos-pvc

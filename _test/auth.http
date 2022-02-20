@@ -22,4 +22,4 @@ Content-Type: application/json
 
 ### User
 GET {{apiUrl}}/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDIyOTEzMTMsImlhdCI6MTY0MjIwNDkxMywic3ViIjoiOCJ9.CFBVPFR-rzDas1PG3jUz-KPeAvnLQ2FQvCsmQcaoo44
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDQ1NzMzNDcsImlhdCI6MTY0NDQ4Njk0Nywic3ViIjoiMSJ9.watWV3Oxc53_b_cjVonzSEPUC5ZKwVjiB8g82FNoSu4

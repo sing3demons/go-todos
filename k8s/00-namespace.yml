@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gotodos
+  labels:
+    name: gotodos
+    module: Namespace 

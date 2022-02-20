@@ -21,7 +21,7 @@ func NewTodoRepository(db *gorm.DB) TodoRepository {
 }
 
 func (repo *todoRepository) AllTodos(limit int, page int) ([]model.Todo, *model.Pagination, error) {
-	var todos []model.Todo
+	todos := []model.Todo{}
 
 	pagination := model.Pagination{
 		Limit: limit,

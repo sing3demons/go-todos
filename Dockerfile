@@ -20,4 +20,4 @@ RUN apk --no-cache add ca-certificates
 COPY --from=builder /go/bin/app /app
 ENTRYPOINT /app
 LABEL Name=gotodos Version=0.0.1
-EXPOSE ${PORT}
+EXPOSE 8080

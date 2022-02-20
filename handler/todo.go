@@ -23,6 +23,7 @@ type insertTodo struct {
 
 type TodoHandler interface {
 	AllTodos(c *fiber.Ctx) error
+	All_Todos(c *fiber.Ctx) error
 	FindTodo(c *fiber.Ctx) error
 	CreateTodo(c *fiber.Ctx) error
 	DeleteTodo(c *fiber.Ctx) error
@@ -36,6 +37,20 @@ type todoHandler struct {
 
 func NewtodoHandler(service service.TodoService, cache *cache.Cacher) TodoHandler {
 	return &todoHandler{service: service, cache: cache}
+}
+
+func (h *todoHandler) All_Todos(c *fiber.Ctx) error {
+	limit, _ := strconv.Atoi(c.Query("limit", "24"))
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	todos, paging, err := h.service.FindTodos(limit, page)
+	if err != nil {
+		log.Printf("redis: %v", err)
+	}
+	var result Pagination
+	copier.Copy(&result, &paging)
+	result.Rows = todos
+
+	return c.Status(fiber.StatusOK).JSON(result)
 }
 
 func (h *todoHandler) AllTodos(c *fiber.Ctx) error {

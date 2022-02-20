@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: app-pv
+  namespace: gotodos
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  hostPath:                                   # hostPath PersistentVolume is used for development and testing. It uses a file/directory on the Node to emulate network-attached storage
+    path: "/mnt/data/data"
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Recycle
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gotodos-pvc
+  namespace: gotodos
+  labels:
+    app: gotodos
+spec:
+  # storageClassName: manual 
+  resources:
+    requests:
+      storage: 5Gi
+  accessModes:
+    - ReadWriteMany

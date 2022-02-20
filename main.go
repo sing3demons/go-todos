@@ -64,24 +64,24 @@ func main() {
 		os.MkdirAll(path, 0755)
 	}
 
-	if os.Getenv("APP_ENV") == "production" {
-		uri := "./logs/logs.log"
-		file, err := os.OpenFile(uri, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatalf("error opening file: %v", err)
-		}
-		defer file.Close()
+	// if os.Getenv("APP_ENV") == "production" {
+	// 	uri := "./logs/logs.log"
+	// 	file, err := os.OpenFile(uri, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	// 	if err != nil {
+	// 		log.Fatalf("error opening file: %v", err)
+	// 	}
+	// 	defer file.Close()
 
-		app.Use(logger.New(logger.Config{
-			Output:       file,
-			Format:       "[${time}], ${status} - ${latency}, ${ip}:${pid}, ${method}, ${path},\n",
-			Next:         nil,
-			TimeFormat:   "15:04:05",
-			TimeZone:     "Local",
-			TimeInterval: 500 * time.Millisecond,
-		}))
+	// 	app.Use(logger.New(logger.Config{
+	// 		Output:       file,
+	// 		Format:       "[${time}], ${status} - ${latency}, ${ip}:${pid}, ${method}, ${path},\n",
+	// 		Next:         nil,
+	// 		TimeFormat:   "15:04:05",
+	// 		TimeZone:     "Local",
+	// 		TimeInterval: 500 * time.Millisecond,
+	// 	}))
 
-	}
+	// }
 
 	app.Get("/log", downloadLogFile)
 

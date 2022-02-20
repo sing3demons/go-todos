@@ -58,7 +58,7 @@ func (r *Router) todoRouter(todoGroup fiber.Router) {
 	todoService := service.NewTodoService(repository)
 	todoHandler := handler.NewtodoHandler(todoService, r.Cacher)
 
-	todoGroup.Get("", todoHandler.AllTodos)
+	todoGroup.Get("", todoHandler.All_Todos)
 	todoGroup.Get("/:id", todoHandler.FindTodo)
 	todoGroup.Post("", todoHandler.CreateTodo)
 	todoGroup.Delete("/:id", todoHandler.DeleteTodo)
