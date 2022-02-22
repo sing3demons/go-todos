@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: gotodos
-        image: sing3demons/gotodos:0.0.2
+        image: sing3demons/gotodos:0.0.3
         resources:
         ports:
           - containerPort: 8080
@@ -47,6 +47,8 @@ spec:
             #     name: go-secret
           - name: APP_ENV
             value: production
+          - name: REDIS_HOST
+            value: redis-client.redis
         volumeMounts:
           - mountPath: /uploads
             name: go-todo

@@ -31,7 +31,12 @@ func (cfg *CacherConfig) Endpoint() string {
 	if redis == "" {
 		redis = "127.0.0.1"
 	}
-	return fmt.Sprintf("%s:6379", redis)
+
+	port := os.Getenv("REDIS_POST")
+	if port == "" {
+		port = "6379"
+	}
+	return fmt.Sprintf("%s:%s", redis, port)
 }
 
 func (cfg *CacherConfig) Password() string {
