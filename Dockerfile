@@ -18,6 +18,8 @@ RUN go build -ldflags "-X main.buildcommit=`git rev-parse --short HEAD` \
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 COPY --from=builder /go/bin/app /app
+COPY config/acl_model.conf config/acl_model.conf
+COPY config/policy.csv config/policy.csv
 ENTRYPOINT /app
 LABEL Name=gotodos Version=0.0.1
 EXPOSE 8080

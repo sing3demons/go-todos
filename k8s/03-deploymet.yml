@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: gotodos
-        image: sing3demons/gotodos:0.0.3
+        image: sing3demons/gotodos:0.0.4
         resources:
         ports:
           - containerPort: 8080

@@ -4,10 +4,10 @@ metadata:
   name: redis-client
   namespace: redis
 spec:
-  type: NodePort
+  # type: NodePort
   selector:
     app: redis
   ports:
   - port: 6379
     targetPort: 6379
-    nodePort: 30006
+    # nodePort: 30006
