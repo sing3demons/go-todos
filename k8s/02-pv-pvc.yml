@@ -1,17 +1,17 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: app-pv
+  name: gotodos-pv
   namespace: gotodos
 spec:
+  storageClassName: manual                    # Storage class. A PV Claim requesting the same storageClass can be bound to this volume.
   capacity:
     storage: 5Gi
-  volumeMode: Filesystem
-  hostPath:                                   # hostPath PersistentVolume is used for development and testing. It uses a file/directory on the Node to emulate network-attached storage
-    path: "/mnt/data/data"
   accessModes:
     - ReadWriteMany
-  persistentVolumeReclaimPolicy: Recycle
+  hostPath:                                   # hostPath PersistentVolume is used for development and testing. It uses a file/directory on the Node to emulate network-attached storage
+    path: "/mnt/data"
+  persistentVolumeReclaimPolicy: Retain       # Retain the PV even after PVC is deleted. 
 
 ---
 apiVersion: v1
@@ -21,10 +21,10 @@ metadata:
   namespace: gotodos
   labels:
     app: gotodos
-spec:
-  # storageClassName: manual 
+spec:                                         # Access mode and resource limits
+  storageClassName: manual                    # Request a certain storage class
+  accessModes:
+    - ReadWriteMany                           # ReadWriteMany means the volume can be mounted as read-write by many Nodes
   resources:
     requests:
       storage: 5Gi
-  accessModes:
-    - ReadWriteMany

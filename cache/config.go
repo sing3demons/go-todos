@@ -32,7 +32,7 @@ func (cfg *CacherConfig) Endpoint() string {
 		redis = "127.0.0.1"
 	}
 
-	port := os.Getenv("REDIS_POST")
+	port := os.Getenv("REDIS_PORT")
 	if port == "" {
 		port = "6379"
 	}

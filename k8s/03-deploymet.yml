@@ -37,18 +37,17 @@ spec:
           timeoutSeconds: 30
           failureThreshold: 5
         env:
+          - name: REDIS_HOST
+            value: redis-client.redis
           - name: PORT
             value: "8080"
           - name: DSN
-            value: host=postgres-service.postgres user=postgresadmin password=admin123 dbname=postgresdb port=5432 sslmode=disable TimeZone=Asia/Bangkok
-            # valueFrom:
-            #   secretKeyRef:
-            #     key: pghost
-            #     name: go-secret
+            valueFrom:
+              secretKeyRef:
+                key: dsn
+                name: go-secret
           - name: APP_ENV
             value: production
-          - name: REDIS_HOST
-            value: redis-client.redis
         volumeMounts:
           - mountPath: /uploads
             name: go-todo
