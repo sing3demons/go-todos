@@ -10,13 +10,10 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
-	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 
-	"github.com/sing3demons/go-todos/cache"
 	"github.com/sing3demons/go-todos/database"
 	"github.com/sing3demons/go-todos/routes"
 )
@@ -47,12 +44,13 @@ func main() {
 	database.InitDB()
 	// seeds.Load()
 
-	app := fiber.New()
-	app.Use(recover.New())
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:8080",
-		AllowHeaders: "Origin, Content-Type, Accept",
-	}))
+	// app := fiber.New()
+	// app.Use(recover.New())
+	// app.Use(cors.New(cors.Config{
+	// 	AllowOrigins: "http://localhost:8080",
+	// 	AllowHeaders: "Origin, Content-Type, Accept",
+	// }))
+	app := routes.NewFiberRouter()
 
 	app.Get("/dashboard", monitor.New())
 	app.Static("/uploads", "./uploads")
@@ -83,7 +81,7 @@ func main() {
 
 	// }
 
-	app.Get("/log", downloadLogFile)
+	// app.Get("/log", downloadLogFile)
 
 	app.Use(logger.New(logger.ConfigDefault))
 	app.Get("/x", func(c *fiber.Ctx) error {
@@ -96,21 +94,14 @@ func main() {
 	app.Get("/healthz", func(c *fiber.Ctx) error { return c.SendStatus(fiber.StatusOK) })
 
 	//Router
-	db := database.GetDB()
-	redis := cache.NewCacher(&cache.CacherConfig{})
-	r := routes.Router{
-		App:    app,
-		DB:     db,
-		Cacher: redis,
-	}
-	r.Serve()
+	routes.Serve(app)
 
 	//Graceful Shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	go func() {
-		if err := r.App.Listen(":" + os.Getenv("PORT")); err != nil {
+		if err := app.Listen(":" + os.Getenv("PORT")); err != nil {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
