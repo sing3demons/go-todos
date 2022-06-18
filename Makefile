@@ -5,11 +5,9 @@ build:
 		-X main.buildtime=`date "+%Y-%m-%dT%H:%M:%S%Z:00"`" \
 		-o app
 
-database-up:
-			docker compose -f database/docker-compose.yml up -d
-			docker compose up redis -d
-clean-up:
-			docker compose -f database/docker-compose.yml down
+database up:
+			docker compose up db redis -d
+clean:
 			docker compose down
 
 image:	

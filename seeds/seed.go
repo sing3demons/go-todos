@@ -12,14 +12,19 @@ import (
 
 func Load() {
 	db := database.GetDB()
+	numOfTodo := 50000
+	// db.Migrator().DropTable(&model.Todo{})
+	// db.AutoMigrate(&model.Todo{})
+
+	todos := make([]model.Todo, numOfTodo)
+	var count int64
+	db.Find(&todos).Count(&count)
+	if count != 0 {
+		return
+	}
 
 	if os.Getenv("APP_ENV") == "dev" {
-		fmt.Println("start")
-		numOfTodo := 50000
-		// db.Migrator().DropTable(&model.Todo{})
-		// db.AutoMigrate(&model.Todo{})
-
-		todos := make([]model.Todo, numOfTodo)
+		fmt.Println("seed data")
 
 		for i := 1; i <= numOfTodo; i++ {
 			todo := model.Todo{

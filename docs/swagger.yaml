@@ -1,0 +1,23 @@
+basePath: /
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a sample swagger for Fiber
+  title: Fiber go-todos API
+  version: "1.0"
+paths:
+  /healthz:
+    get:
+      consumes:
+      - application/json
+      description: get healthz
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Show a healthz
+schemes:
+- http
+- https
+swagger: "2.0"

@@ -9,30 +9,48 @@ import (
 	"syscall"
 	"time"
 
+	swagger "github.com/arsmn/fiber-swagger/v2" // fiber-swagger middleware
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/joho/godotenv"
 
 	"github.com/sing3demons/go-todos/database"
+	_ "github.com/sing3demons/go-todos/docs"
 	"github.com/sing3demons/go-todos/routes"
+	"github.com/sing3demons/go-todos/seeds"
 )
 
 var (
 	buildcommit = "dev"
 	buildtime   = time.Now().String()
+	production  = "production"
 )
 
 func init() {
-	if os.Getenv("APP_ENV") != "production" {
+	if os.Getenv("APP_ENV") != production {
 		err := godotenv.Load(".env")
 		if err != nil {
 			log.Println("Error loading .env file")
 		}
 	}
+
+	if os.Getenv("APP_ENV") != production {
+		database.InitDB()
+		seeds.Load()
+	}
 }
 
+// @title Fiber go-todos API
+// @version 1.0
+// @description This is a sample swagger for Fiber
+
+// @schemes http https
+
+// @host localhost:8080
+// @BasePath /
 func main() {
+	var port string = os.Getenv("PORT")
 	// Liveness Probe
 	_, err := os.Create("/tmp/live")
 	if err != nil {
@@ -42,15 +60,9 @@ func main() {
 
 	// connect database
 	database.InitDB()
-	// seeds.Load()
 
-	// app := fiber.New()
-	// app.Use(recover.New())
-	// app.Use(cors.New(cors.Config{
-	// 	AllowOrigins: "http://localhost:8080",
-	// 	AllowHeaders: "Origin, Content-Type, Accept",
-	// }))
 	app := routes.NewFiberRouter()
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	app.Get("/dashboard", monitor.New())
 	app.Static("/uploads", "./uploads")
@@ -62,27 +74,6 @@ func main() {
 		os.MkdirAll(path, 0755)
 	}
 
-	// if os.Getenv("APP_ENV") == "production" {
-	// 	uri := "./logs/logs.log"
-	// 	file, err := os.OpenFile(uri, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	// 	if err != nil {
-	// 		log.Fatalf("error opening file: %v", err)
-	// 	}
-	// 	defer file.Close()
-
-	// 	app.Use(logger.New(logger.Config{
-	// 		Output:       file,
-	// 		Format:       "[${time}], ${status} - ${latency}, ${ip}:${pid}, ${method}, ${path},\n",
-	// 		Next:         nil,
-	// 		TimeFormat:   "15:04:05",
-	// 		TimeZone:     "Local",
-	// 		TimeInterval: 500 * time.Millisecond,
-	// 	}))
-
-	// }
-
-	// app.Get("/log", downloadLogFile)
-
 	app.Use(logger.New(logger.ConfigDefault))
 	app.Get("/x", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -91,7 +82,7 @@ func main() {
 		})
 	})
 	// Readiness Probe
-	app.Get("/healthz", func(c *fiber.Ctx) error { return c.SendStatus(fiber.StatusOK) })
+	app.Get("/healthz", healthz)
 
 	//Router
 	routes.Serve(app)
@@ -101,7 +92,9 @@ func main() {
 	defer stop()
 
 	go func() {
-		if err := app.Listen(":" + os.Getenv("PORT")); err != nil {
+		fmt.Printf("\nBrowse to http://127.0.0.1:%s/swagger/index.html\n", port)
+
+		if err := app.Listen(":" + port); err != nil {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
@@ -137,3 +130,12 @@ func downloadLogFile(c *fiber.Ctx) error {
 
 	return c.Download(url, "log")
 }
+
+// ShowHealth godoc
+// @Summary Show a healthz
+// @Description get healthz
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Router /healthz [get]
+func healthz(c *fiber.Ctx) error { return c.SendStatus(fiber.StatusOK) }

@@ -11,18 +11,18 @@ echo $?
 
 `output = 0 ,status = up`
 
-| Method |  RelativePath     | CURL                              |
-| ------ | ------------     | --------------------------------- |
-| GET    | /healthz         | ` http://127.0.0.1:8080/healthz` |
-| GET    | /x               | ` http://127.0.0.1:8080/x`       |
+| Method | RelativePath | CURL                             |
+| ------ | ------------ | -------------------------------- |
+| GET    | /healthz     | ` http://127.0.0.1:8080/healthz` |
+| GET    | /x           | ` http://127.0.0.1:8080/x`       |
 
-| Method |  RelativePath     | CURL                              |
-| ------ | ------------     | --------------------------------- |
-| GET    | /api/v1/todos           | ` http://127.0.0.1:8080/api/v1/todos`       |
-| GET    | /api/v1/todos/:id           | ` http://127.0.0.1:8080/api/v1/todos/:id`       |
-| DELETE    | /api/v1/todos/:id           | ` http://127.0.0.1:8080/api/v1/todos/:id`       |
-| POST    | /api/v1/todos           | ` http://127.0.0.1:8080/api/v1/todos`       |
-| PUT    | /api/v1/todos/:id           | ` http://127.0.0.1:8080/api/v1/todos/:id`       |
+| Method | RelativePath      | CURL                                      |
+| ------ | ----------------- | ----------------------------------------- |
+| GET    | /api/v1/todos     | ` http://127.0.0.1:8080/api/v1/todos`     |
+| GET    | /api/v1/todos/:id | ` http://127.0.0.1:8080/api/v1/todos/:id` |
+| DELETE | /api/v1/todos/:id | ` http://127.0.0.1:8080/api/v1/todos/:id` |
+| POST   | /api/v1/todos     | ` http://127.0.0.1:8080/api/v1/todos`     |
+| PUT    | /api/v1/todos/:id | ` http://127.0.0.1:8080/api/v1/todos/:id` |
 
 ```
 docker build -t gotodos:0.0.1 .
@@ -42,12 +42,14 @@ docker run --rm -p 8080:8080 -e PORT=8080 -e APP_ENV=dev -e DB_USER=postgres \
 	  http://localhost:8080/api/v1/auth/sign-up
 ```
 
+## `build database`
 
-## ```build database```
 ```
-docker compose -f database/docker-compose.yml up -d
+docker compose up -d
 ```
+
 ## clean database
+
 ```
-docker compose -f database/docker-compose.yml down 
+docker compose down
 ```
