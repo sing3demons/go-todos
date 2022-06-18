@@ -25,13 +25,17 @@ func NewUserHandler(service service.UserService) UserHandler {
 	}
 }
 
-type Register struct {
-	Email     string `json:"email" validate:"required,email"`
-	Password  string `json:"password" validate:"required,min=6,max=32"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-}
-
+// Register godoc
+// @Summary Add an user
+// @Description add by json User
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param Register-Form body Register true "register"
+// @Success 201
+// @Failure 422 {object} map[string]any
+// @Failure 500 {object} map[string]any
+// @Router /api/v1/auth/sign-up [post]
 func (h *userHandler) Register(c *fiber.Ctx) error {
 	u := new(Register)
 	if err := c.BodyParser(&u); err != nil {
@@ -61,6 +65,17 @@ type formLogin struct {
 	Password string `json:"password" validate:"required,min=6,max=32"`
 }
 
+// Login godoc
+// @Summary login
+// @Description login
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param Login-Form body formLogin true "login"
+// @Success 200 {object} string "token"
+// @Failure 422 {object} map[string]any
+// @Failure 500 {object} map[string]any
+// @Router /api/v1/auth/sign-in [post]
 func (h *userHandler) Login(c *fiber.Ctx) error {
 	u := new(formLogin)
 	if err := c.BodyParser(&u); err != nil {
@@ -96,6 +111,16 @@ func (h *userHandler) Login(c *fiber.Ctx) error {
 	})
 }
 
+// Profile godoc
+// @Summary get an users
+// @Description get by json user
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Success 200 {object} userResponse
+// @Failure 500 {object} map[string]any
+// @Router /api/v1/auth/profile [get]
 func (h *userHandler) Profile(c *fiber.Ctx) error {
 	user := c.Locals("sub").(model.User)
 
@@ -104,8 +129,16 @@ func (h *userHandler) Profile(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(serializedUser)
 }
 
-
-
+// FindUsers godoc
+// @Summary get an users
+// @Description get by json users
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Success 200 {object} userResponse
+// @Failure 500 {object} map[string]any
+// @Router /api/v1/users [get]
 func (h *userHandler) FindUsers(c *fiber.Ctx) error {
 	users, err := h.service.FindByUsers()
 	if err != nil {

@@ -13,6 +13,34 @@ definitions:
       total_rows:
         type: integer
     type: object
+  handler.Register:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        maxLength: 32
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handler.formLogin:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 32
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
   handler.responseError:
     properties:
       message:
@@ -33,12 +61,109 @@ definitions:
       user_id:
         type: integer
     type: object
+  handler.userResponse:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      role:
+        type: string
+    type: object
 info:
   contact: {}
   description: This is a sample swagger for Fiber
   title: Fiber go-todos API
   version: "1.0"
 paths:
+  /api/v1/auth/profile:
+    get:
+      consumes:
+      - application/json
+      description: get by json user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.userResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: get an users
+      tags:
+      - users
+  /api/v1/auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: login
+      parameters:
+      - description: login
+        in: body
+        name: Login-Form
+        required: true
+        schema:
+          $ref: '#/definitions/handler.formLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: login
+      tags:
+      - users
+  /api/v1/auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: add by json User
+      parameters:
+      - description: register
+        in: body
+        name: Register-Form
+        required: true
+        schema:
+          $ref: '#/definitions/handler.Register'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ""
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add an user
+      tags:
+      - users
   /api/v1/todos:
     get:
       consumes:
@@ -91,6 +216,8 @@ paths:
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/handler.responseError'
+      security:
+      - BearerAuth: []
       summary: Add an todo
       tags:
       - todos
@@ -114,6 +241,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/handler.responseError'
+      security:
+      - BearerAuth: []
       summary: delete an todo
       tags:
       - todos
@@ -178,6 +307,28 @@ paths:
       summary: update an todo
       tags:
       - todos
+  /api/v1/users:
+    get:
+      consumes:
+      - application/json
+      description: get by json users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.userResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: get an users
+      tags:
+      - users
   /healthz:
     get:
       consumes:
@@ -193,7 +344,7 @@ schemes:
 - http
 - https
 securityDefinitions:
-  ApiKeyAuth:
+  BearerAuth:
     in: header
     name: Authorization
     type: apiKey

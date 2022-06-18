@@ -14,6 +14,9 @@ func Serve(app *MyRouter) {
 	db := database.GetDB()
 	cache := cache.NewCacher(&cache.CacherConfig{})
 
+	authenticate := middleware.JwtVerify()
+	authorize := middleware.Authorize()
+
 	todoGroup := v1.Group("todos")
 	{
 		repository := repository.NewTodoRepository(db)
@@ -22,6 +25,7 @@ func Serve(app *MyRouter) {
 
 		todoGroup.Get("", todoHandler.AllTodos)
 		todoGroup.Get("/:id", todoHandler.FindTodo)
+		todoGroup.Use(authenticate, authorize)
 		todoGroup.Post("", todoHandler.CreateTodo)
 		todoGroup.Delete("/:id", todoHandler.DeleteTodo)
 		todoGroup.Put("/:id", todoHandler.UpdateTodo)
@@ -32,8 +36,6 @@ func Serve(app *MyRouter) {
 		repository := repository.NewUserRepository(db)
 		service := service.NewUserService(repository)
 		handler := handler.NewUserHandler(service)
-
-		authenticate := middleware.JwtVerify()
 
 		authGroup.Post("/sign-up", handler.Register)
 		authGroup.Post("/sign-in", handler.Login)
@@ -46,10 +48,9 @@ func Serve(app *MyRouter) {
 		repository := repository.NewUserRepository(db)
 		service := service.NewUserService(repository)
 		handler := handler.NewUserHandler(service)
+		todoGroup.Use(authenticate, authorize)
 
-		authenticate := middleware.JwtVerify()
-		authorize := middleware.Authorize()
-		userGroup.Get("/", authenticate, authorize, handler.FindUsers)
+		userGroup.Get("/", handler.FindUsers)
 	}
 
 }
