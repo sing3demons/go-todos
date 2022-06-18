@@ -18,7 +18,7 @@ import (
 type insertTodo struct {
 	Title string                `form:"title" validate:"required"`
 	Desc  string                `form:"desc" validate:"required"`
-	Image *multipart.FileHeader `form:"image" validate:"required"`
+	Image *multipart.FileHeader `form:"image"`
 }
 
 type TodoHandler interface {
@@ -35,24 +35,19 @@ type todoHandler struct {
 	cache   *cache.Cacher
 }
 
-func NewtodoHandler(service service.TodoService, cache *cache.Cacher) TodoHandler {
+func NewTodoHandler(service service.TodoService, cache *cache.Cacher) TodoHandler {
 	return &todoHandler{service: service, cache: cache}
 }
 
-func (h *todoHandler) All_Todos(c *fiber.Ctx) error {
-	limit, _ := strconv.Atoi(c.Query("limit", "24"))
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	todos, paging, err := h.service.FindTodos(limit, page)
-	if err != nil {
-		log.Printf("redis: %v", err)
-	}
-	var result Pagination
-	copier.Copy(&result, &paging)
-	result.Rows = todos
-
-	return c.Status(fiber.StatusOK).JSON(result)
-}
-
+// AllTodos godoc
+// @Summary Show an todos
+// @Tags todos
+// @Accept  json
+// @Produce  json
+// @Param page query uint false "page"
+// @Param limit query uint false "limit"
+// @Success 200 {object} Pagination
+// @Router /api/v1/todos [get]
 func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
 	limit, _ := strconv.Atoi(c.Query("limit", "24"))
 	page, _ := strconv.Atoi(c.Query("page", "1"))
@@ -128,27 +123,85 @@ func (h *todoHandler) AllTodos(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(result)
 }
 
+// FindTodo godoc
+// @Summary Show an todo
+// @Description get string by id
+// @Tags todos
+// @ID get-string-by-int
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Todo ID"
+// @Success 200 {object} todoResponse
+// @Failure 404 {object} responseError
+// @Router /api/v1/todos/{id} [get]
 func (h *todoHandler) FindTodo(c *fiber.Ctx) error {
 	id, err := findByID(c)
+
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(err)
+		c.Status(fiber.StatusNotFound)
+		return c.JSON(responseError{
+			Status:  fiber.StatusNotFound,
+			Message: "ID: invalid",
+		})
 	}
+
 	todo, err := h.service.FindTodo(id)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(err)
+		c.Status(fiber.StatusNotFound)
+		return c.JSON(responseError{
+			Status:  fiber.StatusNotFound,
+			Message: err.Error(),
+		})
 	}
-	return c.Status(fiber.StatusOK).JSON(todo)
+
+	resp := todoResponse{
+		ID:     todo.ID,
+		Title:  todo.Title,
+		Desc:   todo.Desc,
+		Image:  todo.Image,
+		UserID: todo.UserID,
+	}
+	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
+// CreateTodo godoc
+// @Summary Add an todo
+// @Description add by form Todo
+// @Tags todos
+// @Accept  json
+// @Produce  json
+// @Param title formData string true "title"
+// @Param desc formData string true "desc"
+// @Param image formData file true "image"
+// @Security BearerAuth
+// @Success 201
+// @Failure 422 {object} responseError
+// @Router /api/v1/todos [post]
 func (h *todoHandler) CreateTodo(c *fiber.Ctx) error {
 	var form insertTodo
-	c.BodyParser(&form)
+	if err := c.BodyParser(&form); err != nil {
+		c.Status(fiber.StatusUnprocessableEntity)
+		return c.JSON(responseError{
+			Status:  fiber.StatusUnprocessableEntity,
+			Message: err.Error(),
+		})
+	}
+
+	errors := ValidateStruct(&form)
+	if errors != nil {
+		fmt.Println("validate")
+		return c.JSON(errors)
+
+	}
 
 	var todo model.Todo
 	image, err := uploadImage(c, "todo")
 	if err != nil {
-
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(
+			responseError{
+				Status:  fiber.StatusUnprocessableEntity,
+				Message: err.Error(),
+			})
 	}
 
 	copier.Copy(&todo, &form)
@@ -156,62 +209,112 @@ func (h *todoHandler) CreateTodo(c *fiber.Ctx) error {
 
 	err = h.service.CreateTodo(todo)
 	if err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Something went wrong"})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(
+			responseError{
+				Status:  fiber.StatusUnprocessableEntity,
+				Message: "Something went wrong",
+			})
 	}
 	return c.SendStatus(fiber.StatusCreated)
 }
 
+// DeleteTodo godoc
+// @Summary delete an todo
+// @Description delete by json Todo
+// @Tags todos
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Todo ID"
+// @Security BearerAuth
+// @Success 204
+// @Failure 404 {object} responseError
+// @Router /api/v1/todos/{id} [delete]
 func (h *todoHandler) DeleteTodo(c *fiber.Ctx) error {
 	id, err := findByID(c)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(err)
+		return c.Status(fiber.StatusNotFound).JSON(
+			responseError{
+				Status:  fiber.StatusNotFound,
+				Message: err.Error(),
+			})
 	}
 
 	todo, err := h.service.FindTodo(id)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(err)
+		return c.Status(fiber.StatusNotFound).JSON(
+			responseError{
+				Status:  fiber.StatusNotFound,
+				Message: err.Error(),
+			})
 	}
 
-	h.removeImage(todo.Image)
+	if err := h.removeImage(todo.Image); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(
+			responseError{
+				Status:  fiber.StatusUnprocessableEntity,
+				Message: err.Error(),
+			})
+	}
 
-	err = h.service.DeleteTodo(*todo)
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(err)
+	if err = h.service.DeleteTodo(*todo); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(
+			responseError{
+				Status:  fiber.StatusNotFound,
+				Message: err.Error(),
+			})
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
-type updateTodo struct {
-	Title string `form:"title" json:"title"`
-	Desc  string `form:"desc" json:"desc"`
-	Image string `form:"image" json:"image"`
-}
-
+// UpdateTodo godoc
+// @Summary update an todo
+// @Description update by json Todo
+// @Tags todos
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Todo ID"
+// @Param title formData string false "title"
+// @Param desc formData string false "desc"
+// @Param image formData file false "image"
+// @Security BearerAuth
+// @Success 204
+// @Failure 404 {object} responseError
+// @Router /api/v1/todos/{id} [put]
 func (h *todoHandler) UpdateTodo(c *fiber.Ctx) error {
 
 	id, err := findByID(c)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(err)
+		return c.Status(fiber.StatusNotFound).JSON(
+			responseError{
+				Status:  fiber.StatusNotFound,
+				Message: err.Error(),
+			})
 	}
 
 	todo, err := h.service.FindTodo(id)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(err)
+		return c.Status(fiber.StatusNotFound).JSON(
+			responseError{
+				Status:  fiber.StatusNotFound,
+				Message: err.Error(),
+			})
 	}
 
 	var form updateTodo
 	if err := c.BodyParser(&form); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-			"error": err.Error(),
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(responseError{
+			Status:  fiber.StatusUnprocessableEntity,
+			Message: err.Error(),
 		})
 	}
 	copier.Copy(&todo, &form)
 	if form.Image == "" {
 		image, err := uploadImage(c, "todo")
 		if err != nil {
-			return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-				"error": err.Error(),
+			return c.Status(fiber.StatusUnprocessableEntity).JSON(responseError{
+				Status:  fiber.StatusUnprocessableEntity,
+				Message: err.Error(),
 			})
 		}
 		h.removeImage(todo.Image)
@@ -219,9 +322,11 @@ func (h *todoHandler) UpdateTodo(c *fiber.Ctx) error {
 	}
 
 	if err := h.service.UpdateTodo(*todo); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(
+			responseError{
+				Status:  fiber.StatusUnprocessableEntity,
+				Message: err.Error(),
+			})
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)

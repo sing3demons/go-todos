@@ -18,9 +18,9 @@ func Serve(app *MyRouter) {
 	{
 		repository := repository.NewTodoRepository(db)
 		todoService := service.NewTodoService(repository)
-		todoHandler := handler.NewtodoHandler(todoService, cache)
+		todoHandler := handler.NewTodoHandler(todoService, cache)
 
-		todoGroup.Get("", todoHandler.All_Todos)
+		todoGroup.Get("", todoHandler.AllTodos)
 		todoGroup.Get("/:id", todoHandler.FindTodo)
 		todoGroup.Post("", todoHandler.CreateTodo)
 		todoGroup.Delete("/:id", todoHandler.DeleteTodo)

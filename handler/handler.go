@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jinzhu/copier"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -67,10 +68,10 @@ type ErrorResponse struct {
 	Value       string
 }
 
-func ValidateStruct(user interface{}) []*ErrorResponse {
+func ValidateStruct(v any) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
-	err := validate.Struct(user)
+	err := validate.Struct(v)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			var element ErrorResponse
@@ -98,4 +99,37 @@ type userResponse struct {
 	LastName  string `json:"last_name"`
 	Avatar    string `json:"avatar"`
 	Role      string `json:"role"`
+}
+
+type todoResponse struct {
+	ID     uint   `json:"id"`
+	Title  string `json:"title"`
+	Desc   string `json:"desc"`
+	Image  string `json:"image"`
+	UserID uint   `json:"user_id"`
+}
+
+type responseError struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+}
+
+type updateTodo struct {
+	Title string `form:"title" json:"title"`
+	Desc  string `form:"desc" json:"desc"`
+	Image string `form:"image" json:"image"`
+}
+
+func (h *todoHandler) All_Todos(c *fiber.Ctx) error {
+	limit, _ := strconv.Atoi(c.Query("limit", "24"))
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	todos, paging, err := h.service.FindTodos(limit, page)
+	if err != nil {
+		log.Printf("redis: %v", err)
+	}
+	var result Pagination
+	copier.Copy(&result, &paging)
+	result.Rows = todos
+
+	return c.Status(fiber.StatusOK).JSON(result)
 }

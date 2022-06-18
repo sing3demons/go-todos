@@ -12,7 +12,7 @@ import (
 
 func Load() {
 	db := database.GetDB()
-	numOfTodo := 50000
+	numOfTodo := 5000
 	// db.Migrator().DropTable(&model.Todo{})
 	// db.AutoMigrate(&model.Todo{})
 
@@ -34,7 +34,7 @@ func Load() {
 			}
 			todos = append(todos, todo)
 		}
-		db.CreateInBatches(todos, 100)
+		db.Create(&todos)
 		fmt.Println("end...")
 	}
 }

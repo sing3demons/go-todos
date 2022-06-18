@@ -47,6 +47,9 @@ func init() {
 
 // @schemes http https
 
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 // @host localhost:8080
 // @BasePath /
 func main() {

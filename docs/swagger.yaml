@@ -1,11 +1,183 @@
-basePath: /
-host: localhost:8080
+definitions:
+  handler.Pagination:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      rows: {}
+      sort:
+        type: string
+      total_pages:
+        type: integer
+      total_rows:
+        type: integer
+    type: object
+  handler.responseError:
+    properties:
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  handler.todoResponse:
+    properties:
+      desc:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: integer
+    type: object
 info:
   contact: {}
   description: This is a sample swagger for Fiber
   title: Fiber go-todos API
   version: "1.0"
 paths:
+  /api/v1/todos:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Pagination'
+      summary: Show an todos
+      tags:
+      - todos
+    post:
+      consumes:
+      - application/json
+      description: add by form Todo
+      parameters:
+      - description: title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: desc
+        in: formData
+        name: desc
+        required: true
+        type: string
+      - description: image
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ""
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handler.responseError'
+      summary: Add an todo
+      tags:
+      - todos
+  /api/v1/todos/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete by json Todo
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.responseError'
+      summary: delete an todo
+      tags:
+      - todos
+    get:
+      consumes:
+      - application/json
+      description: get string by id
+      operationId: get-string-by-int
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.todoResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.responseError'
+      summary: Show an todo
+      tags:
+      - todos
+    put:
+      consumes:
+      - application/json
+      description: update by json Todo
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: title
+        in: formData
+        name: title
+        type: string
+      - description: desc
+        in: formData
+        name: desc
+        type: string
+      - description: image
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.responseError'
+      security:
+      - BearerAuth: []
+      summary: update an todo
+      tags:
+      - todos
   /healthz:
     get:
       consumes:
@@ -20,4 +192,9 @@ paths:
 schemes:
 - http
 - https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
