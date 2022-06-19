@@ -53,3 +53,10 @@ docker compose up -d
 ```
 docker compose down
 ```
+
+```
+docker run --rm -p 8080:8080 -e PORT=8080 -e APP_ENV=dev \
+-e DSN='host=host.docker.internal user=postgres password=passw0rd dbname=todos port=5432  sslmode=disable TimeZone=Asia/Bangkok' \
+		 -e REDIS_HOST=host.docker.internal \
+		 -e JWT_SECRET_KEY=1F460676-D6C2-4E40-A93F-1F0790C0725C -v $(pwd)/uploads:/uploads --name gotodos sing3demons/gotodos:0.0.6
+```

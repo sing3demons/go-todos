@@ -68,7 +68,7 @@ type ErrorResponse struct {
 	Value       string
 }
 
-func ValidateStruct(v any) []*ErrorResponse {
+func ValidateStruct(v interface{}) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
 	err := validate.Struct(v)

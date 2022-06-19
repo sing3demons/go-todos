@@ -13,44 +13,43 @@ spec:
         app: gotodos
     spec:
       containers:
-      - name: gotodos
-        image: sing3demons/gotodos:0.0.4
-        resources:
-        ports:
-          - containerPort: 8080
-        imagePullPolicy: Always
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 3
-          failureThreshold: 3
-        livenessProbe:
-          exec:
-            command:
-              - cat
-              - /tmp/live
-          initialDelaySeconds: 5
-          periodSeconds: 30
-          timeoutSeconds: 30
-          failureThreshold: 5
-        env:
-          - name: REDIS_HOST
-            value: redis-client.redis
-          - name: PORT
-            value: "8080"
-          - name: DSN
-            valueFrom:
-              secretKeyRef:
-                key: dsn
-                name: go-secret
-          - name: APP_ENV
-            value: production
-        volumeMounts:
-          - mountPath: /uploads
-            name: go-todo
+        - name: gotodos
+          image: sing3demons/gotodos:0.0.6
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command:
+                - cat
+                - /tmp/live
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 30
+            failureThreshold: 5
+          env:
+            - name: REDIS_HOST
+              value: redis-client.redis
+            - name: PORT
+              value: "8080"
+            - name: DSN
+              valueFrom:
+                secretKeyRef:
+                  key: dsn
+                  name: go-secret
+            - name: APP_ENV
+              value: production
+          volumeMounts:
+            - mountPath: /uploads
+              name: go-todo
       volumes:
         - name: go-todo
           persistentVolumeClaim:
