@@ -4,7 +4,7 @@ metadata:
   name: gotodos-pv
   namespace: gotodos
 spec:
-  storageClassName: manual                    # Storage class. A PV Claim requesting the same storageClass can be bound to this volume.
+  # storageClassName: manual                    # Storage class. A PV Claim requesting the same storageClass can be bound to this volume.
   capacity:
     storage: 5Gi
   accessModes:
@@ -22,7 +22,7 @@ metadata:
   labels:
     app: gotodos
 spec:                                         # Access mode and resource limits
-  storageClassName: manual                    # Request a certain storage class
+  # storageClassName: manual                    # Request a certain storage class
   accessModes:
     - ReadWriteMany                           # ReadWriteMany means the volume can be mounted as read-write by many Nodes
   resources:

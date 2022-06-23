@@ -1,4 +1,12 @@
+# go-todos
+
+## run kubernetes
+```chmod +x k8s.sh
+./k8s.sh 
+kubectl get po -n gotodos 
 ```
+
+```go
 go run main.go
 ```
 

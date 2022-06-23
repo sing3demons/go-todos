@@ -1,12 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: myingress
+  name: my-ingress
   annotations:
       kubernetes.io/ingress.class: nginx
   namespace: gotodos
   labels:
-    name: myingress
+    name: my-ingress
 spec:
   rules:
   - host: kubernetes.docker.internal
