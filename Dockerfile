@@ -30,11 +30,9 @@ COPY ./config/policy.csv ./config/policy.csv
 RUN adduser -u 1001 -D -s /bin/sh -g ping 1001
 RUN chown 1001:1001 /app
 
-
-
 # RUN chmod +x /app
 USER 1001
 
 EXPOSE 8080
-CMD [ "/app" ]
+# CMD [ "/app" ]
 ENTRYPOINT [ "/app" ]
