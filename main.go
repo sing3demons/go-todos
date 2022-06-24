@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -54,6 +55,7 @@ func init() {
 // @BasePath /
 func main() {
 	var port string = os.Getenv("PORT")
+	var v string = runtime.Version()
 	// Liveness Probe
 	_, err := os.Create("/tmp/live")
 	if err != nil {
@@ -95,7 +97,9 @@ func main() {
 	defer stop()
 
 	go func() {
-		fmt.Printf("\nBrowse to http://127.0.0.1:%s/swagger/index.html\n", port)
+
+		fmt.Println("go version : ", v)
+		fmt.Printf("Browse to http://127.0.0.1:%s/swagger/index.html\n", port)
 
 		if err := app.Listen(":" + port); err != nil {
 			log.Fatalf("listen: %s\n", err)
@@ -111,27 +115,6 @@ func main() {
 		fmt.Println(err)
 	}
 
-}
-
-func downloadLogFile(c *fiber.Ctx) error {
-	url := "./logs/logs.log"
-
-	// resp, err := os.Open(url)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// defer resp.Close()
-
-	// body, err := ioutil.ReadAll(resp)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// data := []byte("")
-
-	// fmt.Println(string(body))
-	// os.WriteFile(url, data, 0666)
-
-	return c.Download(url, "log")
 }
 
 // ShowHealth godoc

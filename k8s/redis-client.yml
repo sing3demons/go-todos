@@ -21,7 +21,7 @@ spec:
             memory: "1Gi"
             cpu: "500m"
         ports:
-        - containerPort: 6373
+        - containerPort: 6379
         env:
           - name: ALLOW_EMPTY_PASSWORD
             value: "yes"
