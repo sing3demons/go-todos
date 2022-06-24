@@ -1,8 +1,5 @@
 #!/bin/sh -e
 
-# Docker Desktop Mac, from version 18.06.0-ce
-# kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.2.0/deploy/static/provider/aws/deploy.yaml
-
 kubectl apply -f k8s/postgres/
 kubectl apply -f k8s/00-namespace.yml
 kubectl apply -f k8s/redis-client.yml 

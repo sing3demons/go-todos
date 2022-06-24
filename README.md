@@ -1,9 +1,16 @@
 # go-todos
 
 ## run kubernetes
+
+# Docker Desktop Mac, from version 18.06.0-ce
+
+```ingress-nginx
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.2.0/deploy/static/provider/aws/deploy.yaml
+```
+
 ```chmod +x k8s.sh
-./k8s.sh 
-kubectl get po -n gotodos 
+./k8s.sh
+kubectl get po -n gotodos
 ```
 
 ```go
