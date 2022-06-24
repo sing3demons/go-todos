@@ -18,12 +18,13 @@ func Load() {
 
 	todos := make([]model.Todo, numOfTodo)
 	var count int64
-	db.Find(&todos).Count(&count)
-	if count != 0 {
-		return
-	}
 
 	if os.Getenv("APP_ENV") == "dev" {
+		db.Find(&todos).Count(&count)
+		if count > 0 {
+			return
+		}
+
 		fmt.Println("seed data")
 
 		for i := 1; i <= numOfTodo; i++ {
@@ -35,6 +36,25 @@ func Load() {
 			todos = append(todos, todo)
 		}
 		db.Create(&todos)
+		fmt.Println("end...")
+	}
+
+	if os.Getenv("APP_ENV") == "dev" {
+		var user model.User
+		db.Find(&user).Count(&count)
+		if count > 0 {
+			return
+		}
+
+		fmt.Println("seed user")
+
+		user = model.User{
+			Email:     "admin@dev.com",
+			Password:  "p@ssw0rd",
+			FirstName: "admin",
+			Role:      "Admin",
+		}
+		db.Create(&user)
 		fmt.Println("end...")
 	}
 }

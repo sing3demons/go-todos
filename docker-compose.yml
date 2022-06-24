@@ -25,7 +25,7 @@ services:
        - ./config/redis_cfg/redis.conf:/redis.conf
       command: redis-server /redis.conf
   webapi:
-    image: sing3demons/gotodos:0.0.7
+    image: sing3demons/gotodos:0.0.9
     container_name: wabapi
     restart: always
     ports:
